@@ -47,7 +47,7 @@ class Converter
 
 	def each_post(&block)
 		Dir[File.join(self.build_path, "posts", "*")].entries.each do |relpath|
-			yield post_data(relpath)
+			yield self.post_data(relpath)
 		end
 	end
 
@@ -81,22 +81,45 @@ class Converter
 		}
 	end
 
-	def generate_post(post_data)
+	def generate_post(pd)
 		layout = self.layouts['post.html.slim']
 
-		markdown_content = File.read(post_data[:full_path])
+		metadata, markdown_content = parse_post(pd[:full_path])
 		renderer = Redcarpet::Render::HTML.new
 		parser = Redcarpet::Markdown.new(renderer)
 		html_content = parser.render(markdown_content)
 
 		html_page = layout.render(Object.new, {
-				:title => 'TITLE HERE',
-				:subtitle => 'SUBTITLE',
-				:content => html_content
+				:title 		=> metadata[:title],
+				:subtitle => metadata[:subtitle],
+				:date 		=> pd[:date],
+				:content 	=> html_content
 			})
-		File.open(post_data[:out_path], 'w') do |f|
+
+		File.open(pd[:out_path], 'w') do |f|
 			f.write(html_page)
 		end
+	end
+
+	def parse_post(path)
+		contents = File.read(path)
+
+		lines = contents.split("\n")
+		meta_lines = lines.take_while{|l| l =~ /^\*\s/}
+		lines.shift(meta_lines.length)
+
+		props = {}
+		meta_lines.each do |line|
+			line = line.gsub(/^\*\s+/, '').strip
+			key, sep, value = line.partition(':')
+			key = key.strip.downcase.to_sym
+			value = value.strip
+			props[key] = value
+		end
+
+		content = lines.join("\n").strip
+
+		[props, content]
 	end
 
 end
