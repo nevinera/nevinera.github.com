@@ -1,5 +1,7 @@
 source 'http://rubygems.org'
 
+gem 'pry'
+
 gem 'redcarpet'
 gem 'slim'
 gem 'sass'

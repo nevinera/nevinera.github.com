@@ -1,6 +1,7 @@
 require 'date'
 require 'slim'
 require 'redcarpet'
+require 'pry'
 
 class Converter
 	attr_accessor :build_path, :site_path, :layouts
