@@ -1,4 +1,4 @@
 ---
-auto: true
-pygments: true
+auto: false
 markdown: redcarpet
+destination: ..
