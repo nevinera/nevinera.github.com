@@ -1,8 +1,5 @@
----
-layout: post
-title: Fast Paging
-subtitle: Floats are the Devil
----
+* title: Fast Paging
+* subtitle: Floats are the Devil
 
 Everybody in the development world (that hasn't been bitten yet) has some idea
 that floats are vaguely dangerous - 'floating point error' is a boogeyman that

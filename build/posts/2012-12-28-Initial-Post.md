@@ -1,8 +1,5 @@
----
-layout: post
-title: Getting Started
-subtitle: My Last First Post
----
+* title: Getting Started
+* subtitle: My Last First Post
 
 I have false-started a blog too many times to count, and it's because
 I kept trying to write about things that I don't really want to talk
