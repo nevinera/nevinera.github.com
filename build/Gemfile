@@ -1,3 +1,10 @@
 source 'http://rubygems.org'
 
-gem 'jekyll', "~> 0.12.0"
+gem 'redcarpet'
+gem 'slim'
+gem 'sass'
+
+gem 'thin'
+gem 'rack'
+gem 'rack-rewrite'
+
