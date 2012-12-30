@@ -14,7 +14,7 @@ class Converter
 
 	def build_site!
 		self.read_layouts
-		#self.build_index
+		self.clean_out_posts
 		self.build_posts
 		#self.build_styles
 	end
@@ -31,9 +31,6 @@ class Converter
 		end
 	end
 
-	def build_index
-	end
-
 	def build_posts
 		self.each_post do |pd|
 			self.generate_post(pd)
@@ -44,6 +41,10 @@ class Converter
 	end
 
 
+	def clean_out_posts
+		posts_path = File.join(self.site_path, "posts")
+		%x{rm #{posts_path}/*}
+	end
 
 	def each_post(&block)
 		dir = Dir[File.join(self.build_path, "posts", "*")]
