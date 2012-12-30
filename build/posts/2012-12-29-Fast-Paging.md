@@ -9,8 +9,8 @@ representing currency and floating point error accumulation - MySQL does not
 order by the *decimal* representation of floats, which breaks my (described below)
 fast database paging algorithm in subtle ways.
 
-Before we talk about that, I'll need to explain the algorithm in question - it's
-purpose, it's need, and it's approach. Let's approach the standard database paging
+Before we talk about that, I'll need to explain the algorithm in question - its
+purpose, its need, and its approach. Let's approach the standard database paging
 approach first. That uses `LIMIT` and `OFFSET` (which are just two arguments to
 `LIMIT` often) to step by some batch size.
 
