@@ -1,6 +1,7 @@
 require 'date'
 require 'slim'
 require 'redcarpet'
+require 'coderay'
 require 'pry'
 require 'sass'
 
@@ -127,8 +128,14 @@ class Converter
 		post_layout = self.layouts['post.html.slim']
 
 		metadata, markdown_content = parse_post(pd[:full_path])
-		renderer = Redcarpet::Render::HTML.new
-		parser = Redcarpet::Markdown.new(renderer)
+		renderer = MarkdownRenderer.new(:filter_html => true)
+		rc_options = {
+			:fenced_code_blocks => true,
+			:no_intra_emphasis  => true,
+			:strikethrough		 	=> true,
+			:superscript				=> true
+		}
+		parser = Redcarpet::Markdown.new(renderer, rc_options)
 		html_content = parser.render(markdown_content)
 
 		html_post = post_layout.render(Object.new, {
@@ -174,4 +181,13 @@ class Converter
 		[props, content]
 	end
 
+end
+
+class MarkdownRenderer < Redcarpet::Render::HTML
+	def block_code(code, language)
+		CodeRay.highlight(code, language, {
+			:tab_width => 2,
+			:css => :style
+			})
+	end
 end
