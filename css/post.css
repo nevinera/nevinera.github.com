@@ -22,6 +22,7 @@
   max-width: 550px;
   padding: 6px;
   margin-left: auto;
-  margin-right: auto; }
+  margin-right: auto;
+  text-align: justify; }
   #post div.highlight {
     padding: 4px 11px 4px 11px; }

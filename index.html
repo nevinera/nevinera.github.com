@@ -21,29 +21,29 @@ representing currency and floating point error accumulation - MySQL does not
 order by the <em>decimal</em> representation of floats, which breaks my (described below)
 fast database paging algorithm in subtle ways.</p>
 
-<p>Before we talk about that, I&#39;ll need to explain the algorithm in question - it&#39;s
-purpose, it&#39;s need, and it&#39;s approach. Let&#39;s approach the standard database paging
+<p>Before we talk about that, I&#39;ll need to explain the algorithm in question - its
+purpose, its need, and its approach. Let&#39;s approach the standard database paging
 approach first. That uses <code>LIMIT</code> and <code>OFFSET</code> (which are just two arguments to
 <code>LIMIT</code> often) to step by some batch size.</p>
-
-<p><code>ruby
-page = 0
-while batch.nil? or batch.length == BATCH_SIZE
-    batch = relation.limit(BATCH_SIZE).offset(page * BATCH_SIZE)
-    yield batch
-end
-</code></p>
+<div class="CodeRay">
+  <div class="code"><pre>page = <span style="color:#00D">0</span>
+<span style="color:#080;font-weight:bold">while</span> batch.nil? <span style="color:#080;font-weight:bold">or</span> batch.length == <span style="color:#036;font-weight:bold">BATCH_SIZE</span>
+    batch = relation.limit(<span style="color:#036;font-weight:bold">BATCH_SIZE</span>).offset(page * <span style="color:#036;font-weight:bold">BATCH_SIZE</span>)
+    <span style="color:#080;font-weight:bold">yield</span> batch
+<span style="color:#080;font-weight:bold">end</span>
+</pre></div>
+</div>
 
 <p>This was the approach taken by the famously popular will_paginate gem, and
 probably the appropriate approach for the needs of that purpose - aren&#39;t iterating
 through records in batches, you&#39;re going straight to some page, which can&#39;t
 often be done any faster than with limit-offset. The problem that arises with
 that approach can be shown in one query:</p>
-
-<p><code>sql
-SELECT * FROM stars
-ORDER BY name desc LIMIT 1000 OFFSET 10000000;
-</code></p>
+<div class="CodeRay">
+  <div class="code"><pre><span style="color:#B06;font-weight:bold">SELECT</span> * <span style="color:#080;font-weight:bold">FROM</span> stars
+<span style="color:#080;font-weight:bold">ORDER</span> <span style="color:#080;font-weight:bold">BY</span> name <span style="color:#088;font-weight:bold">desc</span> LIMIT <span style="color:#00D">1000</span> OFFSET <span style="color:#00D">10000000</span>;
+</pre></div>
+</div>
 
 <p>This query doesn&#39;t just jump to the right place in the table and start iterating -
 MySQL doesn&#39;t know where that place <em>is</em>. In order to find it, it has to generate
@@ -57,16 +57,16 @@ punishing your <em>very</em> determined paging-system user with a slow page load
 generally acceptable.</p>
 
 <p>ActiveRecord has a <code>find_each</code> and <code>find_in_batches</code>, which do something smarter:</p>
-
-<p><code>ruby
-max_id = 0
-batch = nil
-while batch.nil? or batch.length == BATCH_SIZE
-    batch = relation.where(&#39;id &gt; max_id&#39;).limit(BATCH_SIZE)
+<div class="CodeRay">
+  <div class="code"><pre>max_id = <span style="color:#00D">0</span>
+batch = <span style="color:#069">nil</span>
+<span style="color:#080;font-weight:bold">while</span> batch.nil? <span style="color:#080;font-weight:bold">or</span> batch.length == <span style="color:#036;font-weight:bold">BATCH_SIZE</span>
+    batch = relation.where(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">id &gt; max_id</span><span style="color:#710">'</span></span>).limit(<span style="color:#036;font-weight:bold">BATCH_SIZE</span>)
     max_id = batch.last.id
-    yield batch
-end
-</code></p>
+    <span style="color:#080;font-weight:bold">yield</span> batch
+<span style="color:#080;font-weight:bold">end</span>
+</pre></div>
+</div>
 
 <p>Which pages through the whole set, and never uses an OFFSET to make MySQL sad..
 but can only do it in one order (and I&#39;m sure you&#39;ve noticed that find_each ignores
@@ -77,21 +77,21 @@ than one.</p>
 
 <p>Here&#39;s an algorithm that will page through the stars ordered by <code>name</code> as in
 our second example:</p>
-
-<p><code>ruby
-max_name = nil
-max_id = nil
-batch = nil
-while batch.nil? or batch.length == BATCH_SIZE
+<div class="CodeRay">
+  <div class="code"><pre>max_name = <span style="color:#069">nil</span>
+max_id = <span style="color:#069">nil</span>
+batch = <span style="color:#069">nil</span>
+<span style="color:#080;font-weight:bold">while</span> batch.nil? <span style="color:#080;font-weight:bold">or</span> batch.length == <span style="color:#036;font-weight:bold">BATCH_SIZE</span>
     paged_rel = rel.
-        where(&quot;(name &gt; ? OR (name = ? AND id &gt; ?))&quot;, max_name, max_name, max_id).
-        limit(BATCH_SIZE)
+        where(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">(name &gt; ? OR (name = ? AND id &gt; ?))</span><span style="color:#710">&quot;</span></span>, max_name, max_name, max_id).
+        limit(<span style="color:#036;font-weight:bold">BATCH_SIZE</span>)
     batch = paged_rel.all
-    yield batch
+    <span style="color:#080;font-weight:bold">yield</span> batch
     max_name = batch.last.name
     max_id = batch.last.id
-end
-</code></p>
+<span style="color:#080;font-weight:bold">end</span>
+</pre></div>
+</div>
 
 <p>This works <em>beautifully</em>, and there are a few notes to make about it.</p>
 
@@ -142,27 +142,27 @@ A decimal data column specifies how many digits it gets, and how many digits
 past the decimal point. The representation in the db matches the data that it
 produces when you query it exactly. This matters in situations where you can
 accumulate floating point error of course:</p>
-
-<p><code>sql
-SELECT SUM(distance) FROM stars
-</code></p>
+<div class="CodeRay">
+  <div class="code"><pre><span style="color:#B06;font-weight:bold">SELECT</span> <span style="color:#369;font-weight:bold">SUM</span>(distance) <span style="color:#080;font-weight:bold">FROM</span> stars
+</pre></div>
+</div>
 
 <p>will almost certainly produce a different answer than would</p>
-
-<p><code>ruby
-sum = 0.0
-Star.find_each do |s|
+<div class="CodeRay">
+  <div class="code"><pre>sum = <span style="color:#60E">0.0</span>
+<span style="color:#036;font-weight:bold">Star</span>.find_each <span style="color:#080;font-weight:bold">do</span> |s|
     sum += s.distance
-end
-</code></p>
+<span style="color:#080;font-weight:bold">end</span>
+</pre></div>
+</div>
 
 <p>But that&#39;s not the part that had me pulling hair out for an hour last week.
 The real problem with floats is that:</p>
-
-<p><code>ruby
-d = Star.find(15).distance
-Star.find_by_distance(d)
-</code></p>
+<div class="CodeRay">
+  <div class="code"><pre>d = <span style="color:#036;font-weight:bold">Star</span>.find(<span style="color:#00D">15</span>).distance
+<span style="color:#036;font-weight:bold">Star</span>.find_by_distance(d)
+</pre></div>
+</div>
 
 <p>often returns <em>no result</em>.</p>
 
@@ -173,17 +173,17 @@ we got it from! <code>DECIMAL</code>s don&#39;t have this quality - a single dec
 be converted to and from its decimal string representation without concern.</p>
 
 <p>This enters play on my FastPager in the following case:</p>
-
-<p><code>ruby
-pager = FastPager.new({
-    :klass =&gt; Star,
-    :batch =&gt; 1000,
-    :order =&gt; {:distance =&gt; :asc, :id =&gt; :asc }
+<div class="CodeRay">
+  <div class="code"><pre>pager = <span style="color:#036;font-weight:bold">FastPager</span>.new({
+    <span style="color:#A60">:klass</span> =&gt; <span style="color:#036;font-weight:bold">Star</span>,
+    <span style="color:#A60">:batch</span> =&gt; <span style="color:#00D">1000</span>,
+    <span style="color:#A60">:order</span> =&gt; {<span style="color:#A60">:distance</span> =&gt; <span style="color:#A60">:asc</span>, <span style="color:#A60">:id</span> =&gt; <span style="color:#A60">:asc</span> }
     })
-pager.each_page do |page|
-    # do some stuff with the data
-end
-</code></p>
+pager.each_page <span style="color:#080;font-weight:bold">do</span> |page|
+    <span style="color:#777"># do some stuff with the data</span>
+<span style="color:#080;font-weight:bold">end</span>
+</pre></div>
+</div>
 
 <p>We happen to have 3000 stars of exactly the same <em>decimal</em> distance from us, but
 the first half of them are actually closer than the second half, they just happen
@@ -191,10 +191,10 @@ to map to the same decimal string. Let&#39;s call that lower value <code>x.a</co
 higher one <code>x.b</code>. When we attempt to iterate through them, we read the first
 thousand fine, then the second thousand fine, but then the query for the third
 thousand gets:</p>
-
-<p><code>sql
-SELECT * FROM stars WHERE distance &gt; X OR (distance = X AND id &gt; Y)
-</code></p>
+<div class="CodeRay">
+  <div class="code"><pre><span style="color:#B06;font-weight:bold">SELECT</span> * <span style="color:#080;font-weight:bold">FROM</span> stars <span style="color:#080;font-weight:bold">WHERE</span> distance &gt; X <span style="color:#080;font-weight:bold">OR</span> (distance = X <span style="color:#080;font-weight:bold">AND</span> id &gt; Y)
+</pre></div>
+</div>
 
 <p>It translates X into X.a, and rereads the first thousand, picking up only records
 that happen to have an <code>id</code> higher than Y. That&#39;s bad enough, since you get repeat
