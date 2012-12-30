@@ -26,7 +26,7 @@ class Converter
 				raise "Layout #{filename} does not appear to be a slim file"
 			end
 
-			template = Slim::Template.new(layout_path)
+			template = Slim::Template.new(layout_path, :pretty => true)
 			self.layouts[filename] = template
 		end
 	end
