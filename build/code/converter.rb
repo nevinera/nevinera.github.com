@@ -43,7 +43,7 @@ class Converter
 
 	def clean_out_posts
 		posts_path = File.join(self.site_path, "posts")
-		%x{rm #{posts_path}/*}
+		%x{rm -f #{posts_path}/*}
 	end
 
 	def each_post(&block)
@@ -57,10 +57,11 @@ class Converter
 
 		posts.last[:out_name] = "index.html"
 		posts.last[:out_path] = File.join(self.site_path, "index.html")
+		posts.last[:site_path] = "/index.html"
 
 		posts.each_with_index do |post, n|
-			post[:prev] = n > 0 ? posts[n-1][:out_name] : nil
-			post[:next] = n < posts.length-1 ? posts[n+1][:out_name] : nil
+			post[:prv] = n > 0 ? posts[n-1][:site_path] : nil
+			post[:nxt] = n < posts.length-1 ? posts[n+1][:site_path] : nil
 		end
 
 		posts.each do |p|
@@ -89,12 +90,14 @@ class Converter
 
 		date = Date.new(post_year, post_month, post_day)
 		out_path = File.join(self.site_path, "posts", out_name)
+		site_path = File.join("/posts", out_name)
 
 		{ :full_path => full_path,
 			:file_name => file_name,
 			:post_name => post_name,
 			:out_name  => out_name,
 			:out_path  => out_path,
+			:site_path => site_path,
 			:date			 => date
 		}
 	end
@@ -111,7 +114,9 @@ class Converter
 				:title 		=> metadata[:title],
 				:subtitle => metadata[:subtitle],
 				:date 		=> pd[:date],
-				:content 	=> html_content
+				:content 	=> html_content,
+				:prv			=> pd[:prv],
+				:nxt      => pd[:nxt]
 			})
 
 		site_layout = self.layouts['site.html.slim']

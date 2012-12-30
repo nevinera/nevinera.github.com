@@ -6,3 +6,9 @@ div.content
 
 	div#post
 		== content
+
+	div#links
+		- if prv
+			a(href=prv) Prev
+		- if nxt
+			a(href=nxt) Next
