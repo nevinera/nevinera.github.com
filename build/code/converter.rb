@@ -96,19 +96,26 @@ class Converter
 	end
 
 	def generate_post(pd)
-		layout = self.layouts['post.html.slim']
+		post_layout = self.layouts['post.html.slim']
 
 		metadata, markdown_content = parse_post(pd[:full_path])
 		renderer = Redcarpet::Render::HTML.new
 		parser = Redcarpet::Markdown.new(renderer)
 		html_content = parser.render(markdown_content)
 
-		html_page = layout.render(Object.new, {
+		html_post = post_layout.render(Object.new, {
 				:title 		=> metadata[:title],
 				:subtitle => metadata[:subtitle],
 				:date 		=> pd[:date],
 				:content 	=> html_content
 			})
+
+		site_layout = self.layouts['site.html.slim']
+		html_page = site_layout.render(Object.new, {
+			:title => metadata[:title],
+			:content => html_post
+			})
+
 
 		File.open(pd[:out_path], 'w') do |f|
 			f.write(html_page)
