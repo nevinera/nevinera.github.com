@@ -60,7 +60,6 @@ class Converter
 		end
 
 		posts.each do |p|
-			binding.pry
 			yield p
 		end
 	end
