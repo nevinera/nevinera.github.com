@@ -54,6 +54,9 @@ class Converter
 			[d.year, d.month, d.day]
 		end
 
+		posts.last[:out_name] = "index.html"
+		posts.last[:out_path] = File.join(self.site_path, "index.html")
+
 		posts.each_with_index do |post, n|
 			post[:prev] = n > 0 ? posts[n-1][:out_name] : nil
 			post[:next] = n < posts.length-1 ? posts[n+1][:out_name] : nil
