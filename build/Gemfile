@@ -3,6 +3,7 @@ source 'http://rubygems.org'
 gem 'pry'
 
 gem 'redcarpet'
+gem 'coderay'
 gem 'slim'
 gem 'sass'
 

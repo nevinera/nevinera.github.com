@@ -28,6 +28,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  coderay
   pry
   rack
   rack-rewrite
