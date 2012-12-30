@@ -46,8 +46,22 @@ class Converter
 
 
 	def each_post(&block)
-		Dir[File.join(self.build_path, "posts", "*")].entries.each do |relpath|
-			yield self.post_data(relpath)
+		dir = Dir[File.join(self.build_path, "posts", "*")]
+		posts = dir.entries.map do |relpath|
+			self.post_data(relpath)
+		end.sort_by do |p|
+			d = p[:date]
+			[d.year, d.month, d.day]
+		end
+
+		posts.each_with_index do |post, n|
+			post[:prev] = n > 0 ? posts[n-1][:out_name] : nil
+			post[:next] = n < posts.length-1 ? posts[n+1][:out_name] : nil
+		end
+
+		posts.each do |p|
+			binding.pry
+			yield p
 		end
 	end
 
@@ -76,6 +90,7 @@ class Converter
 		{ :full_path => full_path,
 			:file_name => file_name,
 			:post_name => post_name,
+			:out_name  => out_name,
 			:out_path  => out_path,
 			:date			 => date
 		}
