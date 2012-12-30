@@ -1,0 +1,287 @@
+.highlight {
+  color: #f6f3e8;
+  background: #000000;
+  background-color: #000000;
+  /* Comment */
+  /* Error */
+  /* Generic */
+  /* Keyword */
+  /* Literal */
+  /* Name */
+  /* Operator */
+  /* Other */
+  /* Punctuation */
+  /* Comment.Multiline */
+  /* Comment.Preproc */
+  /* Comment.Single */
+  /* Comment.Special */
+  /* Generic.Deleted */
+  /* Generic.Emph */
+  /* Generic.Error */
+  /* Generic.Heading */
+  /* Generic.Inserted */
+  /* Generic.Output */
+  /* Generic.Prompt */
+  /* Generic.Strong */
+  /* Generic.Subheading */
+  /* Generic.Traceback */
+  /* Keyword.Constant */
+  /* Keyword.Declaration */
+  /* Keyword.Namespace */
+  /* Keyword.Pseudo */
+  /* Keyword.Reserved */
+  /* Keyword.Type */
+  /* Literal.Date */
+  /* Literal.Number */
+  /* Literal.String */
+  /* Name.Attribute */
+  /* Name.Builtin */
+  /* Name.Class */
+  /* Name.Constant */
+  /* Name.Decorator */
+  /* Name.Entity */
+  /* Name.Exception */
+  /* Name.Function */
+  /* Name.Label */
+  /* Name.Namespace */
+  /* Name.Other */
+  /* Name.Property */
+  /* Name.Tag */
+  /* Name.Variable */
+  /* Operator.Word */
+  /* Text.Whitespace */
+  /* Literal.Number.Float */
+  /* Literal.Number.Hex */
+  /* Literal.Number.Integer */
+  /* Literal.Number.Oct */
+  /* Literal.String.Backtick */
+  /* Literal.String.Char */
+  /* Literal.String.Doc */
+  /* Literal.String.Double */
+  /* Literal.String.Escape */
+  /* Literal.String.Heredoc */
+  /* Literal.String.Interpol */
+  /* Literal.String.Other */
+  /* Literal.String.Regex */
+  /* Literal.String.Single */
+  /* Literal.String.Symbol */
+  /* Name.Builtin.Pseudo */
+  /* Name.Variable.Class */
+  /* Name.Variable.Global */
+  /* Name.Variable.Instance */
+  /* Literal.Number.Integer.Long */ }
+  .highlight .hll {
+    background-color: #ffffcc; }
+  .highlight .c {
+    color: #7C7C7C;
+    background-color: black; }
+  .highlight .err {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .g {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .k {
+    color: #6699CC;
+    font-weight: bold;
+    background-color: black; }
+  .highlight .l {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .n {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .o {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .x {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .p {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .cm {
+    color: #7C7C7C;
+    background-color: black; }
+  .highlight .cp {
+    color: #96CBFE;
+    background-color: black; }
+  .highlight .c1 {
+    color: #7C7C7C;
+    background-color: black; }
+  .highlight .cs {
+    color: #7C7C7C;
+    background-color: black; }
+  .highlight .gd {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .ge {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .gr {
+    color: #ffffff;
+    background-color: red; }
+  .highlight .gh {
+    color: #f6f3e8;
+    font-weight: bold;
+    background-color: black; }
+  .highlight .gi {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .go {
+    color: #070707;
+    background-color: black; }
+  .highlight .gp {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .gs {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .gu {
+    color: #f6f3e8;
+    font-weight: bold;
+    background-color: black; }
+  .highlight .gt {
+    color: #ffffff;
+    font-weight: bold;
+    background-color: #ff6c60; }
+  .highlight .kc {
+    color: #6699CC;
+    font-weight: bold;
+    background-color: black; }
+  .highlight .kd {
+    color: #6699CC;
+    font-weight: bold;
+    background-color: black; }
+  .highlight .kn {
+    color: #6699CC;
+    font-weight: bold;
+    background-color: black; }
+  .highlight .kp {
+    color: #6699CC;
+    font-weight: bold;
+    background-color: black; }
+  .highlight .kr {
+    color: #6699CC;
+    font-weight: bold;
+    background-color: black; }
+  .highlight .kt {
+    color: #FFFFB6;
+    background-color: black; }
+  .highlight .ld {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .m {
+    color: #FF73FD;
+    background-color: black; }
+  .highlight .s {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .na {
+    color: #FFD2A7;
+    background-color: black; }
+  .highlight .nb {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .nc {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .no {
+    color: #99CC99;
+    background-color: black; }
+  .highlight .nd {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .ni {
+    color: #E18964;
+    background-color: black; }
+  .highlight .ne {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .nf {
+    color: #FFD2A7;
+    background-color: black; }
+  .highlight .nl {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .nn {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .nx {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .py {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .nt {
+    color: #6699CC;
+    background-color: black; }
+  .highlight .nv {
+    color: #C6C5FE;
+    background-color: black; }
+  .highlight .ow {
+    color: #ffffff;
+    background-color: black; }
+  .highlight .w {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .mf {
+    color: #FF73FD;
+    background-color: black; }
+  .highlight .mh {
+    color: #FF73FD;
+    background-color: black; }
+  .highlight .mi {
+    color: #FF73FD;
+    background-color: black; }
+  .highlight .mo {
+    color: #FF73FD;
+    background-color: black; }
+  .highlight .sb {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .sc {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .sd {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .s2 {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .se {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .sh {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .si {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .sx {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .sr {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .s1 {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .ss {
+    color: #A8FF60;
+    background-color: black; }
+  .highlight .bp {
+    color: #f6f3e8;
+    background-color: black; }
+  .highlight .vc {
+    color: #C6C5FE;
+    background-color: black; }
+  .highlight .vg {
+    color: #C6C5FE;
+    background-color: black; }
+  .highlight .vi {
+    color: #C6C5FE;
+    background-color: black; }
+  .highlight .il {
+    color: #FF73FD;
+    background-color: black; }
