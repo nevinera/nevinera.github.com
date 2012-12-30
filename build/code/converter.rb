@@ -2,21 +2,23 @@ require 'date'
 require 'slim'
 require 'redcarpet'
 require 'pry'
+require 'sass'
 
 class Converter
-	attr_accessor :build_path, :site_path, :layouts
+	attr_accessor :build_path, :site_path, :layouts, :css_paths
 
 	def initialize(opts={})
 		self.build_path = opts[:build_path] || File.expand_path(File.basename(__FILE__) + "/..")
 		self.site_path = opts[:site_path] || File.expand_path(build_path + "/..")
 		self.layouts = {}
+		self.css_paths = []
 	end
 
 	def build_site!
+		self.build_styles
 		self.read_layouts
 		self.clean_out_posts
 		self.build_posts
-		#self.build_styles
 	end
 
 	def read_layouts
@@ -38,6 +40,25 @@ class Converter
 	end
 
 	def build_styles
+		sass_dir = Dir[File.join(self.build_path, "styles", "*")]
+		sass_dir.entries.each do |source|
+			source_path = File.expand_path(source)
+			source_name = File.basename(source_path)
+
+			next if source_name =~ /^_/
+
+			out_name = source_name.gsub(/\.scss$/, '.css')
+			out_name = out_name.gsub(/\.css\.css$/, '.css')
+			out_path = File.join(self.site_path, 'css', out_name)
+
+			css_path = File.join("/css", out_name)
+			self.css_paths << css_path
+
+			css = Sass.compile_file source_path
+			File.open(out_path, 'w') do |f|
+				f.write(css)
+			end
+		end
 	end
 
 
@@ -121,8 +142,9 @@ class Converter
 
 		site_layout = self.layouts['site.html.slim']
 		html_page = site_layout.render(Object.new, {
-			:title => metadata[:title],
-			:content => html_post
+			:title 			=> metadata[:title],
+			:content 		=> html_post,
+			:css_paths 	=> self.css_paths
 			})
 
 
