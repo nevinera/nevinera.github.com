@@ -2,7 +2,7 @@
 * subtitle: How to slam down a slab of wood and call it "Home Improvement"
 
 My wife has written about our countertops previously, at
-[her blog](rusticmodern.blogspot.com) - I'll be stealing most of my photographs
+[her blog](http://rusticmodern.blogspot.com) - I'll be stealing most of my photographs
 from there, since she is a professional photographer and I don't own a camera.
 
 My general philosophy of home improvement stems from my history in software
