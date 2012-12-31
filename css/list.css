@@ -1,0 +1,22 @@
+h1#archive-header {
+  width: 500px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto; }
+
+table#archive {
+  width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 30px; }
+  table#archive a {
+    font-size: 1.4em;
+    text-decoration: none;
+    color: #221212; }
+    table#archive a:hover {
+      color: #AAAABA; }
+  table#archive td.date {
+    width: 50%;
+    text-align: right;
+    vertical-align: middle;
+    padding-right: 12px; }
