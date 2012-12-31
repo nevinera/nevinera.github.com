@@ -3,16 +3,16 @@
 
 Everybody in the development world (that hasn't been bitten yet) has some idea
 that floats are vaguely dangerous - 'floating point error' is a boogeyman that
-we all believe in, but most don't really understand. Well this post isn't really
+everyone has heard of, even if most don't understand it. This post isn't really
 about that. There's another danger to floats that has nothing to do with
 representing currency and floating point error accumulation - MySQL does not
 order by the *decimal* representation of floats, which breaks my (described below)
-fast database paging algorithm in subtle ways.
+fast database paging algorithm in a subtle way.
 
 Before we talk about that, I'll need to explain the algorithm in question - its
 purpose, its need, and its approach. Let's approach the standard database paging
-approach first. That uses `LIMIT` and `OFFSET` (which are just two arguments to
-`LIMIT` often) to step by some batch size.
+approach first. That uses `LIMIT` and `OFFSET` (which are often just two arguments
+to `LIMIT`) to step by some batch size.
 
 ```ruby
 page = 0
@@ -22,11 +22,11 @@ while batch.nil? or batch.length == BATCH_SIZE
 end
 ```
 
-This was the approach taken by the famously popular will_paginate gem, and
-probably the appropriate approach for the needs of that purpose - aren't iterating
-through records in batches, you're going straight to some page, which can't
-often be done any faster than with limit-offset. The problem that arises with
-that approach can be shown in one query:
+This was the approach taken by the popular will_paginate gem, and probably the
+appropriate approach for the needs of that purpose - aren't iterating through
+records in batches, you're going straight to some page, which can't often be done
+any faster than with limit-offset. The problem that arises with that approach can
+be shown in one query:
 
 ```sql
 SELECT * FROM stars
