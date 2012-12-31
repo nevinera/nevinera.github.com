@@ -1,0 +1,8 @@
+h1#archive-header Archive List
+
+table#archive
+	- posts.reverse_each do |post|
+		tr
+			td.date= post[:date].strftime("%F")
+			td.title
+				a(href=post[:site_path])= post[:title]

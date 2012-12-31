@@ -6,20 +6,26 @@ require 'pry'
 require 'sass'
 
 class Converter
-	attr_accessor :build_path, :site_path, :layouts, :css_paths
+	attr_accessor :build_path, :site_path, :layouts, :css_paths, :post_data
 
 	def initialize(opts={})
 		self.build_path = opts[:build_path] || File.expand_path(File.basename(__FILE__) + "/..")
 		self.site_path = opts[:site_path] || File.expand_path(build_path + "/..")
 		self.layouts = {}
 		self.css_paths = []
+		self.post_data = []
 	end
 
 	def build_site!
-		self.build_styles
+
 		self.read_layouts
+		self.read_posts
+
 		self.clean_out_posts
+
+		self.build_styles
 		self.build_posts
+		self.build_list
 	end
 
 	def read_layouts
@@ -35,7 +41,7 @@ class Converter
 	end
 
 	def build_posts
-		self.each_post do |pd|
+		self.post_data.each do |pd|
 			self.generate_post(pd)
 		end
 	end
@@ -68,10 +74,10 @@ class Converter
 		%x{rm -f #{posts_path}/*}
 	end
 
-	def each_post(&block)
+	def read_posts
 		dir = Dir[File.join(self.build_path, "posts", "*")]
 		posts = dir.entries.map do |relpath|
-			self.post_data(relpath)
+			self.one_post_data(relpath)
 		end.sort_by do |p|
 			d = p[:date]
 			[d.year, d.month, d.day]
@@ -86,12 +92,10 @@ class Converter
 			post[:nxt] = n < posts.length-1 ? posts[n+1][:site_path] : nil
 		end
 
-		posts.each do |p|
-			yield p
-		end
+		self.post_data = posts
 	end
 
-	def post_data(path)
+	def one_post_data(path)
 		full_path = File.expand_path(path)
 		file_name = File.basename(full_path)
 
@@ -114,20 +118,42 @@ class Converter
 		out_path = File.join(self.site_path, "posts", out_name)
 		site_path = File.join("/posts", out_name)
 
+		metadata, markdown = parse_post(full_path)
+
 		{ :full_path => full_path,
 			:file_name => file_name,
 			:post_name => post_name,
 			:out_name  => out_name,
 			:out_path  => out_path,
 			:site_path => site_path,
-			:date			 => date
+			:date			 => date,
+			:title		 => metadata[:title],
+			:subtitle  => metadata[:subtitle],
+			:markdown  => markdown
 		}
+	end
+
+	def build_list
+		list_layout = self.layouts['list.html.slim']
+		html_list = list_layout.render(Object.new, {:posts => self.post_data})
+
+		site_layout = self.layouts['site.html.slim']
+		html_page = site_layout.render(Object.new, {
+			:title 			=> "Archive",
+			:content 		=> html_list,
+			:css_paths 	=> self.css_paths
+			})
+
+		list_path = File.join(self.site_path, "list.html")
+
+		File.open(list_path, 'w') do |f|
+			f.write(html_page)
+		end
 	end
 
 	def generate_post(pd)
 		post_layout = self.layouts['post.html.slim']
 
-		metadata, markdown_content = parse_post(pd[:full_path])
 		renderer = MarkdownRenderer.new(:filter_html => true)
 		rc_options = {
 			:fenced_code_blocks => true,
@@ -136,7 +162,7 @@ class Converter
 			:superscript				=> true
 		}
 		parser = Redcarpet::Markdown.new(renderer, rc_options)
-		html_content = parser.render(markdown_content)
+		html_content = parser.render(pd[:markdown])
 
 		links_layout = self.layouts['links.html.slim']
 		html_links = links_layout.render(Object.new, {
@@ -145,8 +171,8 @@ class Converter
 			})
 
 		html_post = post_layout.render(Object.new, {
-				:title 		=> metadata[:title],
-				:subtitle => metadata[:subtitle],
+				:title 		=> pd[:title],
+				:subtitle => pd[:subtitle],
 				:date 		=> pd[:date],
 				:content 	=> html_content,
 				:links    => html_links,
@@ -156,7 +182,7 @@ class Converter
 
 		site_layout = self.layouts['site.html.slim']
 		html_page = site_layout.render(Object.new, {
-			:title 			=> metadata[:title],
+			:title 			=> pd[:title],
 			:content 		=> html_post,
 			:css_paths 	=> self.css_paths
 			})
