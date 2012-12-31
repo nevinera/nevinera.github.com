@@ -24,6 +24,11 @@
   margin-left: auto;
   margin-right: auto;
   text-align: justify; }
+  #post img {
+    max-width: 550px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto; }
   #post div.highlight {
     padding: 4px 11px 4px 11px; }
 
