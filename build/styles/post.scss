@@ -37,3 +37,23 @@
   	padding: 4px 11px 4px 11px;
   }
 }
+
+table.links {
+	width: 550px;
+	margin-left: auto;
+	margin-right: auto;
+
+	td {
+		width: 33%;
+	  &.prev {
+			text-align: left;
+		}
+		&.next {
+			text-align: right;
+		}
+		&.list {
+			text-align: center;
+		}
+	}
+}
+

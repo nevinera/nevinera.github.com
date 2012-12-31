@@ -1,14 +1,9 @@
-div.content
-	div#post-header
+.content
+	#post-header
 		h1#post-title= title
 		span#title-separator or
 		h4#post-subtitle= subtitle
 
-	div#post
-		== content
-
-	div#links
-		- if prv
-			a(href=prv) Prev
-		- if nxt
-			a(href=nxt) Next
+	== links
+	#post== content
+	== links

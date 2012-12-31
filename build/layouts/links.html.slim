@@ -1,0 +1,15 @@
+table.links
+  tr
+    td.prev
+      - if prv
+        a(href=prv) << Previous
+      - else
+        = "<< Previous"
+    td.list
+      a(href='/list.html') Archive
+
+    td.next
+      - if nxt
+        a(href=nxt) Next >>
+      - else
+        = "Next >>"

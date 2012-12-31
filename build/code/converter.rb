@@ -138,11 +138,18 @@ class Converter
 		parser = Redcarpet::Markdown.new(renderer, rc_options)
 		html_content = parser.render(markdown_content)
 
+		links_layout = self.layouts['links.html.slim']
+		html_links = links_layout.render(Object.new, {
+			:prv => pd[:prv],
+			:nxt => pd[:nxt]
+			})
+
 		html_post = post_layout.render(Object.new, {
 				:title 		=> metadata[:title],
 				:subtitle => metadata[:subtitle],
 				:date 		=> pd[:date],
 				:content 	=> html_content,
+				:links    => html_links,
 				:prv			=> pd[:prv],
 				:nxt      => pd[:nxt]
 			})
