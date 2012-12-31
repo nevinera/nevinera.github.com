@@ -1,5 +1,5 @@
-* title: Butcherblock
-* subtitle: A Countertop Made of Cutting Board!
+* title: Butcherblock Countertops
+* subtitle: How to slam down a slab of wood and call it "Home Improvement"
 
 My wife has written about our countertops previously, at
 [her blog](rusticmodern.blogspot.com) - I'll be stealing most of my photographs
@@ -55,7 +55,7 @@ before I was satisfied with its water-resistance, but it's held up well for
 more than a year now, and I use it as a cutting-board constantly.
 
 The surprisingly tricky part was actually the window-sill. I had originally planned
-to make it of the same stuff, but two-inch-think red oak turns out to be too
+to make it of the same stuff, but two-inch-thick red oak turns out to be too
 tough for cheap table saws to handle, and there's no way I'm going to do that
 much notch-cutting with a handsaw! You can't see the other side from here, but
 the ends of the sill jut well past the edge of the actual window on both sides,
@@ -85,7 +85,7 @@ faucet that sprays with some impressive water pressure (washing spoons can drenc
 you), and the extra distance keeps us dry! The main bonus though, is that it
 happens to be exactly the dimensions of the red oak butcher block planks, which
 are *also* called 'Numerar'. Because of that, I don't have to find a way to cut
-a curved hole into a 2" think oak slab, and I am *thankful*.
+a curved hole into a 2" thick oak slab, and I am *thankful*.
 
 By replacing the sink at the same time as the counter, I in fact was able to
 position it exactly one plank's distance from the edge of the room, which allowed
@@ -97,12 +97,12 @@ The thing that had us initially concerned was that everyone on the internet
 decided (as I often do) to just ignore them - their concerns proved reasonable,
 but it doesn't turn out to matter. After about 8 months of usage with water spraying
 on it, chopping on it, etc, we have some signs of wear, including a number of blackish
-rings from leaving wet jars sitting there for days - overall, it's gotten a nice
-*old* feel to it, and it looks great! The most important thing here though is that
+rings from leaving wet jars sitting there for days - but overall, it's just gotten
+a nice *old* feel to it, and it looks great! The most important thing here though is that
 I paid $90 for it, and spent maybe an hour installing it. If I had to replace it
 *every 6 months* it would still work out to a better deal than any of the other
 options (I think every 3-5 years is more likely, and even that's only because I
-have plenty of other uses for the slab).
+have plenty of other uses for the slab once the kitchen is done with it).
 
 Here's a closer look at the edge with the sink - this is a few months after
 installation, and you can see a slightly darker color on the end. It comes off
