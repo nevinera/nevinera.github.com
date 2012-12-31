@@ -85,7 +85,7 @@ class Converter
 
 		posts.last[:out_name] = "index.html"
 		posts.last[:out_path] = File.join(self.site_path, "index.html")
-		posts.last[:site_path] = "/index.html"
+		posts.last[:site_path] = "/"
 
 		posts.each_with_index do |post, n|
 			post[:prv] = n > 0 ? posts[n-1][:site_path] : nil
