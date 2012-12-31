@@ -26,3 +26,16 @@
   text-align: justify; }
   #post div.highlight {
     padding: 4px 11px 4px 11px; }
+
+table.links {
+  width: 550px;
+  margin-left: auto;
+  margin-right: auto; }
+  table.links td {
+    width: 33%; }
+    table.links td.prev {
+      text-align: left; }
+    table.links td.next {
+      text-align: right; }
+    table.links td.list {
+      text-align: center; }

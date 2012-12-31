@@ -12,19 +12,27 @@
     <h1 id="post-title">Fast Paging</h1>
     <span id="title-separator">or</span>
     <h4 id="post-subtitle">Floats are the Devil</h4>
-  </div>
-  <div id="post"><p>Everybody in the development world (that hasn&#39;t been bitten yet) has some idea
+  </div><table class="links">
+    <tr>
+      <td class="prev">
+        <a href="/posts/2012-12-28-Initial-Post.html"><< Previous</a></td>
+      <td class="list">
+        <a href="/list.html">Archive</a>
+      </td>
+      <td class="next">Next &gt;&gt;</td>
+    </tr>
+  </table><div id="post"><p>Everybody in the development world (that hasn&#39;t been bitten yet) has some idea
 that floats are vaguely dangerous - &#39;floating point error&#39; is a boogeyman that
-we all believe in, but most don&#39;t really understand. Well this post isn&#39;t really
+everyone has heard of, even if most don&#39;t understand it. This post isn&#39;t really
 about that. There&#39;s another danger to floats that has nothing to do with
 representing currency and floating point error accumulation - MySQL does not
 order by the <em>decimal</em> representation of floats, which breaks my (described below)
-fast database paging algorithm in subtle ways.</p>
+fast database paging algorithm in a subtle way.</p>
 
 <p>Before we talk about that, I&#39;ll need to explain the algorithm in question - its
 purpose, its need, and its approach. Let&#39;s approach the standard database paging
-approach first. That uses <code>LIMIT</code> and <code>OFFSET</code> (which are just two arguments to
-<code>LIMIT</code> often) to step by some batch size.</p>
+approach first. That uses <code>LIMIT</code> and <code>OFFSET</code> (which are often just two arguments
+to <code>LIMIT</code>) to step by some batch size.</p>
 <div class="CodeRay">
   <div class="code"><pre>page = <span style="color:#00D">0</span>
 <span style="color:#080;font-weight:bold">while</span> batch.nil? <span style="color:#080;font-weight:bold">or</span> batch.length == <span style="color:#036;font-weight:bold">BATCH_SIZE</span>
@@ -34,11 +42,11 @@ approach first. That uses <code>LIMIT</code> and <code>OFFSET</code> (which are 
 </pre></div>
 </div>
 
-<p>This was the approach taken by the famously popular will_paginate gem, and
-probably the appropriate approach for the needs of that purpose - aren&#39;t iterating
-through records in batches, you&#39;re going straight to some page, which can&#39;t
-often be done any faster than with limit-offset. The problem that arises with
-that approach can be shown in one query:</p>
+<p>This was the approach taken by the popular will_paginate gem, and probably the
+appropriate approach for the needs of that purpose - aren&#39;t iterating through
+records in batches, you&#39;re going straight to some page, which can&#39;t often be done
+any faster than with limit-offset. The problem that arises with that approach can
+be shown in one query:</p>
 <div class="CodeRay">
   <div class="code"><pre><span style="color:#B06;font-weight:bold">SELECT</span> * <span style="color:#080;font-weight:bold">FROM</span> stars
 <span style="color:#080;font-weight:bold">ORDER</span> <span style="color:#080;font-weight:bold">BY</span> name <span style="color:#088;font-weight:bold">desc</span> LIMIT <span style="color:#00D">1000</span> OFFSET <span style="color:#00D">10000000</span>;
@@ -208,9 +216,14 @@ watcher notices that there&#39;s a job that&#39;s been running for 5 days.</p>
 <p>The problem was cured in every case by converting my float columns to decimals
 over the appropriate range, which took a good 5 hours of migration (There&#39;re a
 lot of stars in the sky, after all).</p>
-</div>
-  <div id="links">
-    <a href="/posts/2012-12-28-Initial-Post.html">Prev</a>
-  </div>
-</div></body>
+</div><table class="links">
+    <tr>
+      <td class="prev">
+        <a href="/posts/2012-12-28-Initial-Post.html"><< Previous</a></td>
+      <td class="list">
+        <a href="/list.html">Archive</a>
+      </td>
+      <td class="next">Next &gt;&gt;</td>
+    </tr>
+  </table></div></body>
 </html>
