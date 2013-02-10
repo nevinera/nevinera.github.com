@@ -89,7 +89,7 @@ a curved hole into a 2" thick oak slab, and I am *thankful*.
 
 By replacing the sink at the same time as the counter, I in fact was able to
 position it exactly one plank's distance from the edge of the room, which allowed
-me to slot a slab into place *withoout cutting* it. The thing is so heavy that I
+me to slot a slab into place *without cutting* it. The thing is so heavy that I
 didn't even screw it into place - it's just sanded, oiled, and sitting there.
 
 The thing that had us initially concerned was that everyone on the internet
