@@ -50,6 +50,6 @@ Our schools have unfairly conflated *knowing* with *understanding*, and it set m
 I've no doubt it has damaged others far more.
 
 I apologize if you were reading this for information or edification - I'm sure I'll post more about C
-another day with those things in mind. But for now, the take-away is: *If you can't think of any way
-to accomplish a task fast enough, there is always C!*
+another day with those things in mind. But for now, the take-away is: If you can't think of any way
+to accomplish a task fast enough, there is always C!
 
