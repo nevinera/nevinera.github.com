@@ -17,7 +17,7 @@ the first of the two we'll be talking about today is called 'UNIX'.
 
 ## Unix
 
-Unix is a somewhat loose term in this context, and it's real definition isn't germane.
+Unix is a somewhat loose term in this context, and its real definition isn't germane.
 A quick read of the wikipedia article might interest you, but the important thing
 for our purposes is really more of the *philosophy* of Unix, and the collection of
 command-line tools that is universally distributed with it. Unix utilities have a few
@@ -36,7 +36,7 @@ and `stderr`.
 
 When you give information to a program, you can often tell it some file to look at,
 but if you don't do that, it almost always means you want it to look at the stuff coming in on `stdin`;
-the text you are feeding into it's intake pipe. Likewise, if you just run a program on the command line,
+the text you are feeding into its intake pipe. Likewise, if you just run a program on the command line,
 `stdout` is by default your terminal, which means it all gets printed to the screen in front of you.
 With large files, that is seldom what you want, and there are various ways to do other things with it
 that we'll go into in a moment.
