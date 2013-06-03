@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta content="Eric Mueller" name="author" />
+    <title>Back to the C</title>
+    <link href="/css/ir_black.css" rel="stylesheet" type="text/css" />
+    <link href="/css/list.css" rel="stylesheet" type="text/css" />
+    <link href="/css/post.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body><div class="content">
+      <div id="post-header">
+        <h1 id="post-title">Back to the C</h1>
+        <span id="title-separator">or</span>
+        <h4 id="post-subtitle">A little bit faster than Ruby</h4>
+      </div><table class="links">
+        <tr>
+          <td class="prev">
+            <a href="/posts/2013-01-01-Decorators.html"><< Previous</a></td>
+          <td class="list">
+            <a href="/list.html">Archive</a>
+          </td>
+          <td class="next">
+            <a href="/">Next >></a></td>
+        </tr>
+      </table><div id="post"><p>There is a general truism in my industry - developer time costs more than computer time.</p>
+        
+        <p>That&#39;s a fairly new valuation - for decades, computers were <em>way</em> more expensive than
+        engineers, and &#39;expressive&#39; higher-level languages were pretty much relegated to academia
+        (with some notable exceptions). But computers continue to get faster, and programmers (despite
+        the explosion of tutorial books and CS programs) are not really getting any smarter.</p>
+        
+        <p>The development of software languages and their uptake is a very interesting topic, but I&#39;m
+        no computer historian; this topic is only relevant because it has led to the development of
+        the language I do most of my work in, Ruby. Ruby is very expressive and pleasant to work in,
+        but it not <em>fast</em>.</p>
+        
+        <p>Now, that term gets thrown around a lot when comparing other languages to Ruby, but it&#39;s
+        only rarely really relevant - implementing complicated logic can be done &#39;fast&#39; in Ruby,
+        as can reading and understanding other people&#39;s code. <em>Computation</em> is the part of Ruby that
+        is slow, and we do surprisingly little of that in most software fields!</p>
+        
+        <p>Emcien (my employer) has a number of rails applications concerned with importing, displaying,
+        and presenting very complicated data to its users, and none of that requires any real computation
+        in Ruby - MySQL does the heavy lifting there, traversing BTrees, maintaining indices, and
+        moving data between disk and memory in efficient ways. The rails applications are almost entirely
+        <em>logic</em> - what kind of data do I need in this case? What are the portion of the results of
+        that query should I present to the user? How can I present these data structures visually?</p>
+        
+        <p>But behind those rails applications, there is a program that we usually refer to as &#39;The Engine&#39;
+        (or sometimes as &#39;Roy&#39;, after our lead scientist who wrote most of that code. That metaphor gets
+        more confusing when said scientist is actually involved in conversations though.) This engine is
+        a C program (though it could be mistaken for FORTRAN if one squints) responsible for taking <em>huge</em>
+        quantities of data, performing analysis on them, and exporting results as a file. This engine could
+        not <em>possibly</em> be written in Ruby - just reading <em>in</em> a 3 gigabyte file takes minutes in that world.</p>
+        
+        <p>Instead, we have 40,000 lines of C code for taking that data, manipulating it into sparse matrices,
+        performing various analyes on it, tracking all kinds of relationships, and eventually dumping it
+        out into another file. And it all takes 30 seconds, and a few hundred megabytes of memory.</p>
+        
+        <p>Recently, I&#39;ve been writing a lot of code in C, mostly reimplementing those same algorithms anew
+        as modularly as possible. And I&#39;m having to overcome old reflexes, which insist that traversing an
+        array of 20 million entries and doing something to each of them is <em>simply absurd</em>, that sorting
+        400,000 structures <em>cannot be done</em>. Because they can, in C. And it takes seconds or less.</p>
+        
+        <p>But writing in C is <em>hard!</em> I spend more time debugging that coding; I&#39;m having to design
+        data-structures to hold every little thing. I learned how to program originally in this language,
+        how have I forgotten so much? I&#39;m becoming convinced that I never really learned it, that my
+        CS degree taught me only syntax and notation, and I&#39;m wondering how many people come out of
+        those schools thinking they know how to program that couldn&#39;t do a single project-euler problem.
+        Our schools have unfairly conflated <em>knowing</em> with <em>understanding</em>, and it set me back years;
+        I&#39;ve no doubt it has damaged others far more.</p>
+        
+        <p>I apologize if you were reading this for information or edification - I&#39;m sure I&#39;ll post more about C
+        another day with those things in mind. But for now, the take-away is: If you can&#39;t think of any way
+        to accomplish a task fast enough, there is always C!</p>
+        </div><table class="links">
+        <tr>
+          <td class="prev">
+            <a href="/posts/2013-01-01-Decorators.html"><< Previous</a></td>
+          <td class="list">
+            <a href="/list.html">Archive</a>
+          </td>
+          <td class="next">
+            <a href="/">Next >></a></td>
+        </tr>
+      </table></div></body>
+</html>

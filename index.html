@@ -3,84 +3,436 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
     <meta content="Eric Mueller" name="author" />
-    <title>Back to the C</title>
+    <title>Text Manipulation with Unix and Ruby</title>
     <link href="/css/ir_black.css" rel="stylesheet" type="text/css" />
     <link href="/css/list.css" rel="stylesheet" type="text/css" />
     <link href="/css/post.css" rel="stylesheet" type="text/css" />
   </head>
   <body><div class="content">
-      <div id="post-header">
-        <h1 id="post-title">Back to the C</h1>
-        <span id="title-separator">or</span>
-        <h4 id="post-subtitle">A little bit faster than Ruby</h4>
-      </div><table class="links">
-        <tr>
-          <td class="prev">
-            <a href="/posts/2013-01-01-Decorators.html"><< Previous</a></td>
-          <td class="list">
-            <a href="/list.html">Archive</a>
-          </td>
-          <td class="next">Next &gt;&gt;</td>
-        </tr>
-      </table><div id="post"><p>There is a general truism in my industry - developer time costs more than computer time.</p>
-        
-        <p>That&#39;s a fairly new valuation - for decades, computers were <em>way</em> more expensive than
-        engineers, and &#39;expressive&#39; higher-level languages were pretty much relegated to academia
-        (with some notable exceptions). But computers continue to get faster, and programmers (despite
-        the explosion of tutorial books and CS programs) are not really getting any smarter.</p>
-        
-        <p>The development of software languages and their uptake is a very interesting topic, but I&#39;m
-        no computer historian; this topic is only relevant because it has led to the development of
-        the language I do most of my work in, Ruby. Ruby is very expressive and pleasant to work in,
-        but it not <em>fast</em>.</p>
-        
-        <p>Now, that term gets thrown around a lot when comparing other languages to Ruby, but it&#39;s
-        only rarely really relevant - implementing complicated logic can be done &#39;fast&#39; in Ruby,
-        as can reading and understanding other people&#39;s code. <em>Computation</em> is the part of Ruby that
-        is slow, and we do surprisingly little of that in most software fields!</p>
-        
-        <p>Emcien (my employer) has a number of rails applications concerned with importing, displaying,
-        and presenting very complicated data to its users, and none of that requires any real computation
-        in Ruby - MySQL does the heavy lifting there, traversing BTrees, maintaining indices, and
-        moving data between disk and memory in efficient ways. The rails applications are almost entirely
-        <em>logic</em> - what kind of data do I need in this case? What are the portion of the results of
-        that query should I present to the user? How can I present these data structures visually?</p>
-        
-        <p>But behind those rails applications, there is a program that we usually refer to as &#39;The Engine&#39;
-        (or sometimes as &#39;Roy&#39;, after our lead scientist who wrote most of that code. That metaphor gets
-        more confusing when said scientist is actually involved in conversations though.) This engine is
-        a C program (though it could be mistaken for FORTRAN if one squints) responsible for taking <em>huge</em>
-        quantities of data, performing analysis on them, and exporting results as a file. This engine could
-        not <em>possibly</em> be written in Ruby - just reading <em>in</em> a 3 gigabyte file takes minutes in that world.</p>
-        
-        <p>Instead, we have 40,000 lines of C code for taking that data, manipulating it into sparse matrices,
-        performing various analyes on it, tracking all kinds of relationships, and eventually dumping it
-        out into another file. And it all takes 30 seconds, and a few hundred megabytes of memory.</p>
-        
-        <p>Recently, I&#39;ve been writing a lot of code in C, mostly reimplementing those same algorithms anew
-        as modularly as possible. And I&#39;m having to overcome old reflexes, which insist that traversing an
-        array of 20 million entries and doing something to each of them is <em>simply absurd</em>, that sorting
-        400,000 structures <em>cannot be done</em>. Because they can, in C. And it takes seconds or less.</p>
-        
-        <p>But writing in C is <em>hard!</em> I spend more time debugging that coding; I&#39;m having to design
-        data-structures to hold every little thing. I learned how to program originally in this language,
-        how have I forgotten so much? I&#39;m becoming convinced that I never really learned it, that my
-        CS degree taught me only syntax and notation, and I&#39;m wondering how many people come out of
-        those schools thinking they know how to program that couldn&#39;t do a single project-euler problem.
-        Our schools have unfairly conflated <em>knowing</em> with <em>understanding</em>, and it set me back years;
-        I&#39;ve no doubt it has damaged others far more.</p>
-        
-        <p>I apologize if you were reading this for information or edification - I&#39;m sure I&#39;ll post more about C
-        another day with those things in mind. But for now, the take-away is: If you can&#39;t think of any way
-        to accomplish a task fast enough, there is always C!</p>
-        </div><table class="links">
-        <tr>
-          <td class="prev">
-            <a href="/posts/2013-01-01-Decorators.html"><< Previous</a></td>
-          <td class="list">
-            <a href="/list.html">Archive</a>
-          </td>
-          <td class="next">Next &gt;&gt;</td>
-        </tr>
-      </table></div></body>
+  <div id="post-header">
+    <h1 id="post-title">Text Manipulation with Unix and Ruby</h1>
+    <span id="title-separator">or</span>
+    <h4 id="post-subtitle">Avoiding Regular Expressions for Fun and Profit</h4>
+  </div><table class="links">
+    <tr>
+      <td class="prev">
+        <a href="/posts/2013-02-10-Back-to-the-C.html"><< Previous</a></td>
+      <td class="list">
+        <a href="/list.html">Archive</a>
+      </td>
+      <td class="next">Next &gt;&gt;</td>
+    </tr>
+  </table><div id="post"><p><code>cat ~/data.txt | cut -d &#39;,&#39; -f 3,4 | sort | uniq | wc -l</code></p>
+
+<p>I just counted the distinct combinations of values found in two columns
+of a 6-gig csv file; it took about 30 seconds.</p>
+
+<p><code>cat ~/data.txt | cut -d &#39;,&#39; -f 3,4 | sort | uniq -c | sort -n -r &gt; /tmp/output.txt</code></p>
+
+<p>That time I asked how many times each of those pairs occurred, and I asked
+it to tell me the most frequent combinations first (and to stick the results
+in a file for me to view, since there may be many of them).</p>
+
+<p>Text processing is a complex topic, and there are many approaches to it to consider;
+the first of the two we&#39;ll be talking about today is called &#39;UNIX&#39;.</p>
+
+<h2>Unix</h2>
+
+<p>Unix is a somewhat loose term in this context, and it&#39;s real definition isn&#39;t germane.
+A quick read of the wikipedia article might interest you, but the important thing
+for our purposes is really more of the <em>philosophy</em> of Unix, and the collection of
+command-line tools that is universally distributed with it. Unix utilities have a few
+driving principles in common: &quot;Everything is a File&quot;, and &quot;Files Have Lines&quot;.</p>
+
+<p>Most unix utilities are intended to operate on the lines of a file, either individually
+or in aggregate - the <code>grep</code> utility is used to filter a file down to the lines of interest,
+while the <code>sort</code> utility is used to put them in some order, and <code>wc -l</code> will count them for you.</p>
+
+<h3>Text Streams</h3>
+
+<p>There are a few overarching bits of syntax to describe first. Every unix program has three
+streams of data - think of it as a box with a big pipe going in, a big pipe coming out, and
+an information cable sticking out the side. These three streams of data are called <code>stdin</code>, <code>stdout</code>,
+and <code>stderr</code>.</p>
+
+<p>When you give information to a program, you can often tell it some file to look at,
+but if you don&#39;t do that, it almost always means you want it to look at the stuff coming in on <code>stdin</code>;
+the text you are feeding into it&#39;s intake pipe. Likewise, if you just run a program on the command line,
+<code>stdout</code> is by default your terminal, which means it all gets printed to the screen in front of you.
+With large files, that is seldom what you want, and there are various ways to do other things with it
+that we&#39;ll go into in a moment.</p>
+
+<p><code>stderr</code> is different - it&#39;s not intended as a way to import or export data from
+a given program; the text printed on stderr is always intended for a <em>human</em> to read.
+It&#39;s the diagnostic output for a given program. <code>grep</code> can read a 9 gigabyte file, and
+print out 20,000 lines that turned out to be relevant.. but if something goes <em>wrong</em>,
+it will tell you that on <code>stderr</code>: &quot;That file was not found&quot;, &quot;I didn&#39;t understand your question&quot;, etc.</p>
+
+<p>There are several ways to make these file streams point where you want them to.
+The first way is called..</p>
+
+<h4>File Redirection</h4>
+
+<p>On the command line (in the bash shell specifically, but if you&#39;re using anything else
+you probably know enough that you won&#39;t get much from this article), the characters <code>&gt;</code> and <code>&lt;</code>
+have special meaning - they tell the preceding program to use some specific <em>file</em> as
+one of its streams. <code>&lt; myfile.txt</code> means &quot;And read myfile.txt as your input stream&quot;;
+<code>&gt; myotherfile.txt</code> means &quot;Write your output stream into myotherfile.txt&quot;. You can double up
+the output symbol: <code>&gt;&gt; myotherfile.txt</code> means &quot;*Append* your output stream onto myotherfile.txt&quot;.</p>
+
+<p>We&#39;ll use the <code>cat</code> command to demonstrate - <code>cat</code> is short for &#39;concatenate&#39;, and it simply
+accepts one or more input files or a stream and writes them to its output stream.</p>
+
+<p><code>cat &lt; input.txt &gt; output.txt</code></p>
+
+<p>This <em>essentially</em> just copied input.txt to output.txt. It didn&#39;t do it as fast as the <code>cp</code>
+command would have either.</p>
+
+<p><code>cat &lt; input.txt &gt;&gt; output.txt</code></p>
+
+<p>Now we have <em>appended</em> input.txt onto the end of output.txt. If we have already
+run the command above, we should see that output.txt is twice as long as input.txt.
+You can see that via <code>wc -l input.txt output.txt</code> - it will show you line counts for each
+of its arguments.</p>
+
+<p>This is all mildly handy, but kind of awkward - if you want to do anything for which there
+is not already a unix utility, you&#39;re kind of stuck. Or would be, except for..</p>
+
+<h4>Stream Piping</h4>
+
+<p>There is another special character you ought to know about; it&#39;s called the &#39;pipe&#39; character: <code>|</code>.
+It is used to tell a program to hook its output stream directly to the input stream
+of some other program. Here&#39;s an example:</p>
+
+<p><code>cat &lt; input.txt | wc -l</code></p>
+
+<p>I told <code>cat</code> to pick up its input from <code>input.txt</code>, and then I told it to send its output to
+<code>wc -l</code>, which will just count the lines it sees and print a number. That construct isn&#39;t very
+useful, because you can easily just say <code>wc -l input.txt</code> (this is referred to as a &quot;Useless
+Use of <code>cat</code>&quot;), but it demonstrates pipe operator well enough I think.</p>
+
+<p>Here&#39;s a more useful one, from the top of the post:</p>
+
+<p><code>cat &lt; ~/data.txt | cut -d &#39;,&#39; -f 3,4 | sort | uniq -c | sort -n -r &gt; /tmp/output.txt</code></p>
+
+<p>This construction &#39;pipes&#39; data into cat, cut, sort, uniq, and sort again, then directs the output
+into a file so that we can review it at our leisure.  (<code>cat</code> is again uselessly-used,
+but I prefer to use it this way for conceptual clarity).</p>
+
+<p>We&#39;ll go over some details of the individual steps in this pipeline in a moment, but briefly:</p>
+
+<ul>
+<li><code>cut</code> is used to extract specific columns of a csv (non-quoted, sadly).</li>
+<li><code>sort</code> sorts a file in various ways - it can handle surprisingly large files, but it can take some time.</li>
+<li><code>uniq</code> removes duplicates from a stream. It only removes them when they&#39;re <em>adjacent</em>, which is why we sorted first.</li>
+</ul>
+
+<p>It turns out that, by combining fairly specific utilities in different ways, you can do <em>very</em>
+complicated things - this command will produce a list of distinct combinations of values in two columns,
+ordered by how often each pairing occurs in the file.</p>
+
+<p>When you string a bunch of commands together like this, you are using the simplest form of multi-processing,
+as well. Each of those pieces of the pipeline is its own program, and can run on a separate processor,
+which means that you can use a modern computer to do things <em>blazing</em> fast, even with very large files.</p>
+
+<h3>A Brief Survey of the Tools</h3>
+
+<p>I will be describing a few of the command line tools and arguments that I use regularly here, in brief.</p>
+
+<p>For a more full description, one can consult google, but the most helpful result will usually
+be the &#39;man page&#39;. You can see that in your own terminal by running <code>man cut</code> or <code>man cat</code>
+(the resulting view uses the &#39;less&#39; pager - you can navigate with the arrow keys and pgup/pgdown,
+and exit with <code>q</code>, but you might find the web version easier to read).</p>
+
+<h4><code>cat</code></h4>
+
+<p><code>cat</code> is pretty straightforward. You use it to take inputs and tape them together:</p>
+
+<p><code>cat f1.txt f2.txt f3.txt &gt; out.txt</code> will produce a file called &#39;out.txt&#39; that is made up
+of the input files stuck together end-to-end. <code>stdin</code> comes before all the arguments, so
+<code>cat f2.txt f3.txt &lt; f1.txt &gt; out.txt</code> would produce the same result.. unless you use the
+<code>-</code> argument. That would look like <code>cat f1.txt - f3.txt &lt; f2.txt &gt; out.txt</code> (which produces
+exactly the same output). This is particularly useful when you&#39;re trying to glue a header
+onto something as it flies past:</p>
+
+<p><code>cat hugefile | cat header.txt - &gt; /huge.with-header.txt</code></p>
+
+<p>The <code>-n</code> argument tells <code>cat</code> to stick a line number in front of each line as it passes.</p>
+
+<h4><code>cut</code></h4>
+
+<p><code>cut</code> is used to split input lines up based on a separator character. It&#39;s not aware of
+quoting, so you&#39;ll end up using it sparingly on real-world files.</p>
+
+<p>The most important arguments are:</p>
+
+<ul>
+<li><code>-d &#39;,&#39;</code> - the value of this argument is the &#39;delimiter&#39; - the character the split the line on.</li>
+<li><code>-f 3,4-6</code> -  the value after the <code>-f</code> argument is a description of which parts of the line you are interested in.</li>
+</ul>
+
+<p>The delimiter is usually going to be either a comma or a pipe character.
+If you ask for fields 3-1000000, it will usually give you all the fields except 1 and 2 -
+<code>cut</code> doesn&#39;t mind that there aren&#39;t a million fields there, it just gives you what it can.</p>
+
+<p><code>cut -d &#39;,&#39; -f 1 &lt; infile.txt &gt; first_column.txt</code></p>
+
+<p>This will give you a file containing just the first column of the original file.</p>
+
+<p><code>cut -d &#39;,&#39; -f 2-1000 &lt; infile.txt &gt; rest.txt</code></p>
+
+<p>That will give you a file containing the <em>rest</em> of the columns from the original file.</p>
+
+<h4><code>sort</code></h4>
+
+<p>Sorting is expensive, and unix-sort is very good at handling files that would be very difficult to sort
+normally - files that don&#39;t fit in available memory, for example, will be split up onto disk, sorted separately,
+and merged back together.</p>
+
+<p>You often use <code>sort</code> with no arguments, so that lines that are identical will appear adjacent,
+making them suitable for <code>uniq</code>ing.</p>
+
+<p><code>cat input.txt | sort &gt; output.txt</code></p>
+
+<p>There are a few main arguments that you&#39;ll need from time to time:</p>
+
+<ul>
+<li><code>-f</code> means &#39;ignore case&#39;</li>
+<li><code>-n</code> means &#39;sort numerically&#39;. This means that 10 will come after 9, instead of after 1.</li>
+<li><code>-r</code> means &#39;reverse the output&#39;, so you can get a descending sort.</li>
+</ul>
+
+<h4><code>uniq</code></h4>
+
+<p>The sister of <code>sort</code>, uniq rarely shows up alone. You do sometimes see it in unnecessary places
+for performace reasons - sorting is expensive, and uniqueing is almost free, so running a unique <em>before</em>
+a sort and also <em>after</em> is totally reasonable, even though it would produce the same output if
+you skipped the first call to <code>uniq</code>.</p>
+
+<ul>
+<li><code>-c</code> - stands for &#39;count&#39;. You&#39;ll get a count of how many identical lines were reduced down to each unique line.</li>
+<li><code>-i</code> - case-insensitive. Collapse &#39;hello&#39; and &#39;HELLO&#39; when they are adjacent.</li>
+</ul>
+
+<p>You will often see <code>uniq -c</code> piped to <code>sort -n -r</code> to produce a list of uniq items, with the
+most frequent items at the top.</p>
+
+<h4><code>wc</code></h4>
+
+<p>It stands for &#39;word count&#39;, and it&#39;s a useful informational tool. Run with no arguments, it&#39;ll
+print out several numbers: <code>line_count</code>, <code>word_count</code>, and <code>character_count</code>.
+If any options are supplied, it will print out only the values for those options.</p>
+
+<ul>
+<li><code>-l</code> just print out a line-count. This is the most frequently used option.</li>
+<li><code>-w</code> word-count. Words are strings of characters separated by whitespace (including newlines).</li>
+</ul>
+
+<p>If you give wc a list of files (or a &#39;glob&#39;, which is a filename with a wildcard in it),
+it will print out information for each of them, which can be useful for comparison:</p>
+<div class="CodeRay">
+  <div class="code"><pre>wc -l *.txt
+
+     15 /tmp/f1.txt
+     14 /tmp/f2.txt
+   1022 /tmp/f3.txt
+</pre></div>
+</div>
+
+<h4><code>tr</code></h4>
+
+<p><code>tr</code> stands for &#39;translate&#39; - it replaces specific characters with other characters.</p>
+
+<p>You can use it to remove all pipes from a file, to replace commas with pipes, to remove all spaces, etc.</p>
+
+<p>With no flags, it takes two arguments - the characters to remove, and the characters to replace them with.</p>
+
+<p><code>tr &#39;aeiou&#39; &#39;      &#39; &lt; input.txt &gt; output.txt</code> will replace all vowels with spaces.</p>
+
+<p>The only argument you are likely to use is <code>-d</code> - it means &#39;remove the characters instead of replacing them&#39;.
+You supply it like:</p>
+
+<p><code>tr -d &#39;aeiou&#39; &lt; input.txt &gt; output.txt</code> - it will simply remove the vowels from the stream.</p>
+
+<h2>Ruby</h2>
+
+<p>Ruby is a scripting language, much like bash (which is the language you are typing into your terminal),
+but much more pleasant to read and write. A full introduction to ruby is really beyond the
+scope of our conversation; I&#39;m going to focus on the simpler parts that one can use to 
+manipulate files, run unix commands, and transform text.</p>
+
+<h3>Making a ruby script</h3>
+
+<p>A ruby script is any file containing ruby code. It generally should have a name that ends with &#39;.rb&#39;,
+and you run it as a program by calling <code>ruby myscript.rb</code>. It can be included in a pipeline like any program:</p>
+
+<p><code>cat myfile.txt | sort -n -r | ruby replacename.rb | sort | uniq &gt; /tmp/out.txt</code></p>
+
+<p>To start with, let&#39;s discuss a ruby script that processes lines of text, much like most unix utilities do.
+Here is our script:</p>
+<div class="CodeRay">
+  <div class="code"><pre>line_number = <span style="color:#00D">0</span>
+<span style="color:#069">STDIN</span>.each_line <span style="color:#080;font-weight:bold">do</span> |line|
+  line_number += <span style="color:#00D">1</span>
+
+  <span style="color:#080;font-weight:bold">if</span> line_number.even?
+    <span style="color:#069">STDOUT</span>.puts line.chomp
+  <span style="color:#080;font-weight:bold">else</span>
+    <span style="color:#069">STDOUT</span>.puts line.chomp.reverse
+  <span style="color:#080;font-weight:bold">end</span>
+<span style="color:#080;font-weight:bold">end</span>
+</pre></div>
+</div>
+
+<p>This silly script reads lines from stdin, and reverses all of the odd lines. I&#39;ll describe some details:</p>
+
+<ul>
+<li><code>STDIN</code>, <code>STDOUT</code> - these constants refer to the input and output streams we talked about above. In ruby,
+they have some useful methods on them - they are of type <code>IO</code>, which means you iterate the lines,
+you can write to them, etc.</li>
+<li><code>line_number</code> is a &#39;variable&#39; that is tracking which line you&#39;re on. Without knowing that, it would be tough
+to figure out which ones are odd.</li>
+<li><code>even?</code> is the name of a method on numbers, which returns <code>true</code> or <code>false</code> depending on whether the number is even.</li>
+<li><code>.each_line do |line|</code> is a special ruby thing - this is called a &#39;block&#39;, and it&#39;s a way for you to pass
+<em>code</em> to a function. In this case, we&#39;re calling <code>each_line</code>, and then we&#39;re telling it what to <em>do</em> for each line.</li>
+<li><code>chomp</code>, <code>reverse</code> - these are methods on <code>String</code> - ruby provides a <em>lot</em> of methods on the string class,
+which can come in handy. <code>chomp</code> removes newlines from the ends of lines, and <code>reverse</code> reverses the string front-to-back.</li>
+<li><code>STDOUT.puts</code> - this writes a string to stdout. It also adds a newline to the end, which is why I called <code>chomp</code>
+on them first.</li>
+</ul>
+
+<h3>Console Scripting in Ruby</h3>
+
+<p>Sometimes you are faced with a monotonous but daunting task - run a command for each of a hundred files, or download
+and import a file a dozen times. You can generally accomplish those tasks using bash, but it&#39;s frequently much easier
+to do it in Ruby.</p>
+
+<p>The important constructs are the <code>system</code> call, and backticks.</p>
+
+<h4><code>system</code></h4>
+
+<p>The <code>system</code> function in ruby shells out to bash to do something. You could for example run
+<code>system(&quot;cp /tmp/f1.txt /tmp/f2.txt&quot;)</code> to run the bash copy command from within ruby. When
+using <code>system</code>, the bash command being run uses the ruby script&#39;s stdin and stdout as its own.
+A ruby script like this one:</p>
+<div class="CodeRay">
+  <div class="code"><pre>system <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">ls /tmp</span><span style="color:#710">&quot;</span></span>
+</pre></div>
+</div>
+
+<p>will actually print the same thing as just running <code>ls /tmp</code> does.</p>
+
+<p>More usefully, we could do:</p>
+<div class="CodeRay">
+  <div class="code"><pre>paths = [
+  <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">/tmp/f1.txt</span><span style="color:#710">&quot;</span></span>,
+  <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">/tmp/f2.txt</span><span style="color:#710">&quot;</span></span>,
+  <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">/tmp/f3.txt</span><span style="color:#710">&quot;</span></span>
+]
+
+paths.each <span style="color:#080;font-weight:bold">do</span> |path|
+  destination = path + <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">.out</span><span style="color:#710">&quot;</span></span>
+  <span style="color:#069">STDERR</span>.puts <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#b0b">\n</span><span style="color:#b0b">\n</span><span style="color:#b0b">\n</span><span style="color:#D20">Processing </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>path<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20"> into </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>destination<span style="font-weight:bold;color:#666">}</span></span><span style="color:#b0b">\n</span><span style="color:#b0b">\n</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span>
+  system <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">myscript </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>path<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20"> &gt; </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>destination<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>
+<span style="color:#080;font-weight:bold">end</span>
+</pre></div>
+</div>
+
+<p>That script runs some command (<code>myscript</code>) on each of the three files listed in <code>paths</code>.
+It puts the output of <code>myscript</code> in a file like &quot;/tmp/f1.txt.out&quot;.</p>
+
+<p>You see a new bit of syntax that&#39;s very important now - in a double-quoted string, <code>#{}</code> means &#39;interpolate&#39;.
+If you have a variable <code>myvar</code> which contains the string &#39;Salut&#39;, and you have the string
+<code>&quot;my variable is #{myvar}&quot;</code>, the string evaluates to &quot;my variable is Salut&quot;.</p>
+
+<p><code>myscript</code> could be doing almost anything here. A more specific example addressing a problem
+somebody asked me about recently would look something like:</p>
+<div class="CodeRay">
+  <div class="code"><pre>directories = [
+  <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">/tmp/dir1</span><span style="color:#710">&quot;</span></span>,
+  <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">/tmp/dir2</span><span style="color:#710">&quot;</span></span>,
+  <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">/tmp/dir3</span><span style="color:#710">&quot;</span></span>
+]
+
+directories.each <span style="color:#080;font-weight:bold">do</span> |dir|
+  file1 = <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>dir<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20">/f1.txt</span><span style="color:#710">&quot;</span></span>
+  file2 = <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>dir<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20">/f2.txt</span><span style="color:#710">&quot;</span></span>
+  dest1 = <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>dir<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20">/out1.txt</span><span style="color:#710">&quot;</span></span>
+  dest2 = <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>dir<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20">/out2.txt</span><span style="color:#710">&quot;</span></span>
+
+  <span style="color:#069">STDERR</span>.puts <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#b0b">\n</span><span style="color:#b0b">\n</span><span style="color:#D20">   Processing directory </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>dir<span style="font-weight:bold;color:#666">}</span></span><span style="color:#b0b">\n</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span>
+
+  system(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">script1 </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>file1<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20"> </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>file2<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20"> &gt; </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>dest1<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>)
+  system(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">script2 </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>file1<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20"> </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>file2<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20"> &gt; </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>dest2<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>)
+<span style="color:#080;font-weight:bold">end</span>
+</pre></div>
+</div>
+
+<h3>CSV parsing in Ruby</h3>
+
+<p>One very important thing for our purposes that you can do in Ruby but that is very painful in Unix is
+proper CSV parsing, with quoted strings. This document:</p>
+<div class="CodeRay">
+  <div class="code"><pre>a,b,&quot;c&quot;&quot;&quot;
+d,&quot;e,f&quot;,g
+</pre></div>
+</div>
+
+<p>Should have two rows, with three fields each, but if you split on &#39;comma&#39;, your second row has four fields instead.</p>
+
+<p>So we can use the <code>csv</code> library:</p>
+<div class="CodeRay">
+  <div class="code"><pre>require <span style="background-color:hsla(120,100%,50%,0.06)"><span style="color:#161">`</span><span style="color:#2B2">csv</span><span style="color:#161">`</span></span>
+
+line_number = <span style="color:#00D">0</span>
+<span style="color:#069">STDIN</span>.each_line <span style="color:#080;font-weight:bold">do</span> |line|
+  line_number += <span style="color:#00D">1</span>
+  parts = <span style="color:#036;font-weight:bold">CSV</span>.parse_line(line)
+
+  <span style="color:#080;font-weight:bold">if</span> parts.length &lt; <span style="color:#00D">10</span>
+    raise <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Short row encountered on line </span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>line_number<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>
+  <span style="color:#080;font-weight:bold">end</span>
+
+  parts[<span style="color:#00D">0</span>] = parts[<span style="color:#00D">0</span>].downcase
+
+  <span style="color:#069">STDOUT</span>.puts <span style="color:#036;font-weight:bold">CSV</span>.generate_line(parts)
+<span style="color:#080;font-weight:bold">end</span>
+</pre></div>
+</div>
+
+<p>That script parses each line using csv, downcases the first field, then prints them back out (again using csv).
+This is most often how you need to interact with csv files - break the line up into fields, operate
+on one or more of the fields, then put them back together into a csv line and output it.</p>
+
+<p>A few new details here:</p>
+
+<ul>
+<li><code>parts.length</code> - parts is an <code>Array</code> - it has a length, and you can access individual members of the array with brackets.</li>
+<li><code>CSV.parse_line</code> takes a string and parses it as a line of csv into an array of fields.</li>
+<li><code>CSV.generate_line</code> does the opposite, taking a list of fields and building a csv line from them.</li>
+<li><code>.downcase</code> is a method strings have, which turns all uppercase letters into their lower equivalent.</li>
+<li><code>raise()</code> raises an exception. If run, it halts the program, prints its message (on stderr), and gives you a stack trace
+so you can tell where it came from. You often should raise an exception when you encounter a condition you did not
+expect to encounter, so you can go figure out whether your assumption is wrong, or your code.</li>
+</ul>
+
+<h3>Google-Foo</h3>
+
+<p>Ruby provides a <em>lot</em> of functionality for you, especially to deal with manipulating strings, arrays, and files.
+To find documentation about the specific type of object you are working with, just search for &#39;Ruby 1.8.7 Array&#39;
+(or whatever version of ruby you are using. You can see that using <code>ruby -v</code>).</p>
+
+<p>The page for ruby strings is particularly worth reading, but the CSV library has documentation as well. Or you can
+always ask ruby developer - finding the right documentation page to look at is usually the first step in solving
+any problem!</p>
+</div><table class="links">
+    <tr>
+      <td class="prev">
+        <a href="/posts/2013-02-10-Back-to-the-C.html"><< Previous</a></td>
+      <td class="list">
+        <a href="/list.html">Archive</a>
+      </td>
+      <td class="next">Next &gt;&gt;</td>
+    </tr>
+  </table></div></body>
 </html>
