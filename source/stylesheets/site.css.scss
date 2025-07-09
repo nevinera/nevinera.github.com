@@ -1,24 +1,36 @@
-body {
-  background-color: #fbc547;
-  color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir",
-    "Segoe UI", "Lucida Grande", "Helvetica Neue", "Helvetica", "Fira Sans",
-    "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu",
-    "Franklin Gothic Medium", "Century Gothic", "Liberation Sans", sans-serif;
-  padding: 18vh 1rem;
+h1.title-heading {
+  width: 100%;
   text-align: center;
+  margin-top: 2em;
+  margin-bottom: 3em;
 }
 
-a {
-  color: rgba(#000, 0.7);
+div.home-wrapper {
+  width: 100%;
+  margin: 3em 1em 2em;
 
-  &:focus,
-  &:hover {
-    color: rgba(#000, 0.6);
+  div.posts-container {
+    div.short-post {
+      margin-bottom: 3em;
+      width: 70%;
+      margin-left: auto;
+      margin-right: auto;
+
+      div.post-header {
+        span.post-date {
+          margin-right: 2em;
+        }
+
+        span.post-title {
+          font-weight: bold;
+        }
+      }
+
+      div.post-summary {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
   }
-}
-
-.middleman-logo {
-  margin-bottom: 1rem;
-  width: 10rem;
 }
