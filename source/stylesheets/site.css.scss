@@ -1,8 +1,18 @@
 h1.title-heading {
   width: 100%;
   text-align: center;
-  margin-top: 2em;
-  margin-bottom: 3em;
+  margin-top: 2.5em;
+  margin-bottom: 2em;
+}
+
+body {
+  padding-left: 2em;
+  padding-right: 2em;
+
+  h1,h2,h3,h4,h5 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
 }
 
 div.home-wrapper {
@@ -32,5 +42,14 @@ div.home-wrapper {
         margin-right: auto;
       }
     }
+  }
+}
+
+a {
+  color: #000000;
+  text-decoration: none;
+
+  &:hover {
+    color: #888888;
   }
 }
