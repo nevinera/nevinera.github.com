@@ -1,0 +1,35 @@
+h1.title-heading {
+  width: 100%;
+  text-align: center;
+  margin-top: 2.5em;
+  margin-bottom: 2em; }
+
+body {
+  padding-left: 2em;
+  padding-right: 2em; }
+  body h1, body h2, body h3, body h4, body h5 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em; }
+
+div.home-wrapper {
+  width: 100%;
+  margin: 3em 1em 2em; }
+  div.home-wrapper div.posts-container div.short-post {
+    margin-bottom: 3em;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto; }
+    div.home-wrapper div.posts-container div.short-post div.post-header span.post-date {
+      margin-right: 2em; }
+    div.home-wrapper div.posts-container div.short-post div.post-header span.post-title {
+      font-weight: bold; }
+    div.home-wrapper div.posts-container div.short-post div.post-summary {
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto; }
+
+a {
+  color: #000000;
+  text-decoration: none; }
+  a:hover {
+    color: #888888; }
