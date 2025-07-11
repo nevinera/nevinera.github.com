@@ -66,12 +66,13 @@ But the thing is, knowing that about a method is _powerful_ - it's actually a st
 when we define the memoized method we're _declaring the meaning of that method_. Declarative
 programming is far easier to follow than imperative, because that's how we _think_ about things:
 we can understand what each defined "thing" represents, without having to model any mental
-_state_.
+_state_. It's rarely relevant in _my_ code, but it also tells the reader that the method is
+**state-invariant**; if there _is_ any mutable state in the object, _this method doesn't care_.
 
 And what I have found is that the _more_ methods I memoize on an object, the better. Ideally (and
 usually) I can memoize _every_ method - this is what I call a "lazy/immutable object."
 
-### "A Lazy/Immutable Object... That's a rock. You've described a rock."
+### A Lazy/Immutable Object... That's a rock. You've described a rock.
 
 Well, mostly I've described anything that doesn't move, so yeah a rock is a good example. Not
 very relevant to software though.. Here's a bit of code that is _not_ lazy and immutable:
@@ -124,7 +125,10 @@ And if you think that looks _artifically bad_, well.. it is. But I've seen basic
 code at least five times in different repositories I needed to work on; this is the _normal_ kind
 of bad. Now for the alternative (well, the one I'm backing here), lazy/immutable style, also called
 "why did you memoize so many methods?". (Named for the PR comment I get six times my first week in
-any new role).
+any new role). The answer is that, to me `memoize` isn't a performance tool, it's an _annotation_ -
+when I mark a method as memoized, I _might_ be improving its performance, but I'm mostly just
+indicating that it's invariant, which is important to know (not having to think about whether a
+method _should_ be memoized, since it invariably already was.. that's just a bit of a bonus).
 
 The _goal_ when you're writing something in this style is to _pick good method names_. And yes, I'm
 aware that that's the hardest part of software engineering (aside from style-guide consensus; I'll
@@ -176,7 +180,7 @@ in terms of other methods that don't exist yet, and then you write each of _thos
 way, until you no longer need any further methods to express the definitions.
 
 
-#### That seems contrived. I usually need parameters on my methods.
+### That seems contrived. I usually need parameters on my methods.
 
 That's the neat thing, you probably don't! Let's make a version of the thing above that _would_
 be pretty awkward to write without such a method:
@@ -266,7 +270,7 @@ memoize def json_tokens = JSON.parse(string)
 memoize def split_tokens = str.strip.split(/\s+/)
 ```
 
-#### That's just like procedural code, with extra steps!
+### That's just like procedural code, with extra steps!
 
 Well yeah, kind of. You _could_ write this as a process that just calculates each of those things
 and sticks it in a variable, doing so in the correct order. That code would be similarly easy to
