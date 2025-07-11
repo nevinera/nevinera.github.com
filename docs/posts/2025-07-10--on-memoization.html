@@ -262,7 +262,7 @@ you should be really glad for the style).</p>
 the tokens changes? That&rsquo;s more substantial, but it&rsquo;s really clear where to touch - the definition
 of <code>tokens</code> is no longer accurate - it might need another (Tokenizer?) class if the process is
 complex enough, but it&rsquo;ll be surgical, because we can see where the definition of <code>tokens</code> is,
-and replace it (or conditionalize it.</p>
+and replace it (or conditionalize it, etc).</p>
 
 <pre><code class="ruby">memoize def tokens = use_json? ? json_tokens : split_tokens`
 memoize def use_json? = !!@options[:json] # (now optionally supplied to initializer)

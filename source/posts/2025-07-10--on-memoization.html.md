@@ -261,7 +261,7 @@ Let's change the above by.. adding a new type of token? Well, that's pretty easy
 the tokens changes? That's more substantial, but it's really clear where to touch - the definition
 of `tokens` is no longer accurate - it might need another (Tokenizer?) class if the process is
 complex enough, but it'll be surgical, because we can see where the definition of `tokens` is,
-and replace it (or conditionalize it.
+and replace it (or conditionalize it, etc).
 
 ```ruby
 memoize def tokens = use_json? ? json_tokens : split_tokens`
