@@ -1,0 +1,290 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>On Memoization</title>
+
+    <!-- https://pure-css.github.io/start/ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+    <link href="/stylesheets/site.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <!-- Avoid "flash of unstyled content" on firefox -->
+    <script>0</script>
+
+    <h1 class="title-heading"><a href="/">On Memoization</a></h1>
+    <p>Memoization is &ldquo;an optimization technique&rdquo; - it refers to the standard strategy of remembering
+or caching the output of an expensive computation, so that it can be returned without re-running
+the computation in the future. There are some standard idioms for it:</p>
+
+<pre><code class="ruby"># The simplest idiom
+def foo
+  @foo ||= calculate_foo
+end
+
+# The safer idiom (because your calculation might return nil or false)
+def foo
+  return @foo if defined?(@foo)
+  @foo = calculate_foo
+end
+
+# The more performant idiom (see Aaron Patterson&#39;s talks on Object Shape)
+class MemoizingThing
+  def initialize
+    @memoizations = {}
+  end
+
+  def foo
+    return @memoizations[:foo] if @memoizations.key?(:foo)
+    @memoizations[:foo] ||= calculate_foo
+  end
+
+  def bar
+    return @memoizations[:bar] if @memoizations.key?(:bar)
+    @memoizations[:bar] ||= calculate_bar
+  end
+end
+</code></pre>
+
+<p>And of course my favorite, which basically does the latter, but more thoroughly:</p>
+
+<pre><code class="ruby"># use the `memery` gem
+class MemoizingThing
+  include Memery
+  memoize def foo = calculate_foo
+end
+</code></pre>
+
+<p>Those.. aren&rsquo;t what I want to talk about. Though I&rsquo;ll be using the last of them in all my examples
+from here.</p>
+
+<h3>When can you memoize something?</h3>
+
+<p>In general, you can only memoize something when you <em>don&rsquo;t expect its value to change</em> (over the
+lifetime of instantiated object. Be careful memoizing onto Classes and other Singletons, they live
+for a long time!) And that&rsquo;s how most of us use it - &ldquo;I&rsquo;m pretty sure this doesn&rsquo;t ever change, so
+I&rsquo;ll hold onto it&rdquo;.</p>
+
+<p>But the thing is, knowing that about a method is <em>powerful</em> - it&rsquo;s actually a statement of
+&ldquo;invariance&rdquo;, and it makes reasoning about behavior simpler. If the value doesn&rsquo;t change, then
+when we define the memoized method we&rsquo;re <em>declaring the meaning of that method</em>. Declarative
+programming is far easier to follow than imperative, because that&rsquo;s how we <em>think</em> about things:
+we can understand what each defined &ldquo;thing&rdquo; represents, without having to model any mental
+<em>state</em>. It&rsquo;s rarely relevant in <em>my</em> code, but it also tells the reader that the method is
+<strong>state-invariant</strong>; if there <em>is</em> any mutable state in the object, <em>this method doesn&rsquo;t care</em>.</p>
+
+<p>And what I have found is that the <em>more</em> methods I memoize on an object, the better. Ideally (and
+usually) I can memoize <em>every</em> method - this is what I call a &ldquo;lazy/immutable object.&rdquo;</p>
+
+<h3>A Lazy/Immutable Object&hellip; That&rsquo;s a rock. You&rsquo;ve described a rock.</h3>
+
+<p>Well, mostly I&rsquo;ve described anything that doesn&rsquo;t move, so yeah a rock is a good example. Not
+very relevant to software though.. Here&rsquo;s a bit of code that is <em>not</em> lazy and immutable:</p>
+
+<pre><code class="ruby">class StringParser
+  def parse_string(s)
+    result = []
+    s.strip.split(/\s+/).each do |token|
+      parsed_token = parse_token(token)
+      result &lt;&lt; parsed_token if parsed_token
+    end
+    result
+  end
+
+  private
+
+  def parse_token(token) = token.gsub(/[^a-z]+/i, &quot;_&quot;).upcase.to_sym
+end
+</code></pre>
+
+<p>It&rsquo;s pretty straightforward really - I&rsquo;m not trying to create a complex problem to really pick at.
+And it could be a <em>lot</em> worse - there is no actual state being modified.. Okay here&rsquo;s a worse
+version:</p>
+
+<pre><code class="ruby">class StringParser
+  def initialize(str)
+    @str = str
+    @parsed = false
+  end
+
+  def parse_string!
+    @result = []
+    @str.strip.split(/\s+/).each do |token|
+      parsed_token = parse_token(token)
+      @result &lt;&lt; parsed_token if parsed_token
+    end
+    @parsed = true
+  end
+
+  def result
+    fail(NotReadyError, &quot;need to parse_string! first&quot;) unless @parsed
+    @result
+  end
+end
+</code></pre>
+
+<p>And if you think that looks <em>artifically bad</em>, well.. it is. But I&rsquo;ve seen basically that same
+code at least five times in different repositories I needed to work on; this is the <em>normal</em> kind
+of bad. Now for the alternative (well, the one I&rsquo;m backing here), lazy/immutable style, also called
+&ldquo;why did you memoize so many methods?&rdquo;. (Named for the PR comment I get six times my first week in
+any new role). The answer is that, to me <code>memoize</code> isn&rsquo;t a performance tool, it&rsquo;s an <em>annotation</em> -
+when I mark a method as memoized, I <em>might</em> be improving its performance, but I&rsquo;m mostly just
+indicating that it&rsquo;s invariant, which is important to know (not having to think about whether a
+method <em>should</em> be memoized, since it invariably already was.. that&rsquo;s just a bit of a bonus).</p>
+
+<p>The <em>goal</em> when you&rsquo;re writing something in this style is to <em>pick good method names</em>. And yes, I&rsquo;m
+aware that that&rsquo;s the hardest part of software engineering (aside from style-guide consensus; I&rsquo;ll
+post on that topic another day). In every case possible, pick <em>nouns</em> - complex noun phrases are
+fine, so long as the person reading the name of the method doesn&rsquo;t need to read the method again
+to recall what it does. (Ideally, they won&rsquo;t have to read it in the first place, and will just
+<em>assume</em> that it does what the name says it does, but that&rsquo;s a high bar, and you&rsquo;ll only be able
+to construct such a name maybe two-thirds of the time in reality.) Usually, you can get away with
+having <em>no</em> methods that take any arguments - if you can&rsquo;t make that work, it&rsquo;s frequently an
+indicator of a missing abstraction, which I&rsquo;ll show you in a moment.</p>
+
+<p>What &ldquo;things&rdquo; are there that we could give a definition for? Well, we have a &ldquo;string&rdquo;, the input.
+We have a &ldquo;result&rdquo;, the output. We also have the &ldquo;tokens&rdquo; - that&rsquo;s what you get when you split the
+string up for processing (<code>@str.strip.split(/\s+/)</code>). And that <code>parse_token</code> method - it looks like
+it&rsquo;s cleaning the token up and then making it into an upcased symbol? This is where the
+&ldquo;memoization&rdquo; is for performance people start squinting at me, but remember that <em>that</em> is not my
+goal most of the time (I work mostly on Rails apps, so while there are <em>occasionally</em> places that
+<em>this</em> sort of performance difference matters, it&rsquo;s so rare that I can discard it as a factor by
+default. In rails, performance means &ldquo;make fewer trips to the database&rdquo;, or occasionally &ldquo;stop
+writing 9-layer joins&rdquo;.) We&rsquo;re going to break that single method up into two steps, creating an
+intermediate result, <code>cleaned_tokens</code>.</p>
+
+<pre><code class="ruby">class StringParser
+  include Memery
+
+  NUMERIC = /\A\d+\z/
+
+  def initialize(str)
+    @str = str
+  end
+
+  # Yes, we _could_ just stick the definition of `transformed_tokens` here. But then it doesn&#39;t
+  # have a meaningful *name*, and that&#39;s the whole point.
+  memoize def result = transformed_tokens
+
+  private
+
+  memoize def transformed_tokens = cleaned_tokens.map(&amp;:upcase).map(&amp;:to_sym)
+
+  memoize def cleaned_tokens = tokens.map { |ct| ct.gsub(/[^a-z]+/i, &quot;_&quot;) }
+
+  memoize def tokens = str.strip.split(/\s+/)
+end
+</code></pre>
+
+<p>I wrote that in the order that it appears, and that&rsquo;s a frequent pattern - you write the result
+in terms of other methods that don&rsquo;t exist yet, and then you write each of <em>those</em> methods the same
+way, until you no longer need any further methods to express the definitions.</p>
+
+<h3>That seems contrived. I usually need parameters on my methods.</h3>
+
+<p>That&rsquo;s the neat thing, you probably don&rsquo;t! Let&rsquo;s make a version of the thing above that <em>would</em>
+be pretty awkward to write without such a method:</p>
+
+<pre><code class="ruby">def parse_token(token)
+  if token =~ /foo/i
+    :foo
+  elsif token =~ /bar/i
+    :bar
+  elsif token =~ /\A\d+\z/
+    :&quot;numeric_#{token.to_i}&quot;
+  else
+    token.to_sym
+  end
+end
+</code></pre>
+
+<p>This is a silly example, but a typical pattern - map across the <em>things</em>, doing some complicated
+operation to each of them. And I <em>can&rsquo;t</em> write that as a lazy/memoized implementation (without
+doing some gymnastics around zipping mapped sparse partial-results, which I will spare you). I&rsquo;d
+write it as two.</p>
+
+<pre><code class="ruby">class StringParser
+  include Memery
+
+  def initialize(str)
+    @str = str
+  end
+
+  memoize def result = transformers.map(&amp;:result)
+
+  private
+
+  memoize def tokens = str.strip.split(/\s+/)
+
+  memoize def transformers = tokens.map { |tok| Transformer.new(tok) }
+
+  # I refer to these as &quot;inner&quot; classes. If it gets complicated, it deserves its own file, but
+  # fundamentally it&#39;s a &quot;domain wrapper&quot; for the unparsed token, which exposes the parsed token
+  # as an attribute.
+  class Transformer
+    include Memery
+
+    def initialize(token)
+      @token = token
+    end
+
+    attr_reader :token
+
+    memoize def foo? = /foo/i.match?(token)
+    memoize def bar? = /bar/i.match?(token)
+    memoize def numeric? = /\A\d+\z/.match?(token)
+    memoize def number = token.to_i
+
+    memoize def transformed
+      return :foo if foo?
+      return :bar if bar?
+      return :&quot;numeric_#{number}&quot; if numeric?
+      token.to_sym
+    end
+  end
+end
+</code></pre>
+
+<p>Now, this is a toy problem, but I probably <em>would</em> actually write the latter code here, despite
+that it&rsquo;s almost twice as long as the first implementation would be. And the reason is that this
+version <em>grows</em> better. Rather than procedural code defining <em>how to parse a string</em>, we have
+declarative code defining <em>what a parsed string is</em>. If the logic about how to parse that string
+changes in any of a hundred ways, it will be <em>obvious</em> in the declarations, and usually
+straightforward (when it&rsquo;s not, because the structure of the thing needs to change, that&rsquo;s when
+you should be really glad for the style).</p>
+
+<p>Let&rsquo;s change the above by.. adding a new type of token? Well, that&rsquo;s pretty easy, we just add
+<code>return :emoji if emoji?</code> and then defined the predicate. What if the process for scanning out
+the tokens changes? That&rsquo;s more substantial, but it&rsquo;s really clear where to touch - the definition
+of <code>tokens</code> is no longer accurate - it might need another (Tokenizer?) class if the process is
+complex enough, but it&rsquo;ll be surgical, because we can see where the definition of <code>tokens</code> is,
+and replace it (or conditionalize it.</p>
+
+<pre><code class="ruby">memoize def tokens = use_json? ? json_tokens : split_tokens`
+memoize def use_json? = !!@options[:json] # (now optionally supplied to initializer)
+memoize def json_tokens = JSON.parse(string)
+memoize def split_tokens = str.strip.split(/\s+/)
+</code></pre>
+
+<h3>That&rsquo;s just like procedural code, with extra steps!</h3>
+
+<p>Well yeah, kind of. You <em>could</em> write this as a process that just calculates each of those things
+and sticks it in a variable, doing so in the correct order. That code would be similarly easy to
+read actually, just hard to modify. And honestly, you should do that if it helps: write out the
+procedural approach (with good variable names), then turn variable-setting into lazy methods and
+control structures into classes - that will usually construct a fairly reasonable result.</p>
+
+<p>A fresh baguette is just flour, yeast, water, and salt with a few extra steps!</p>
+
+<p>I want to reassure you though that this is not just a theory. I&rsquo;ve been writing the vast bulk of
+my code this way for six years or so, and I&rsquo;ve had no regrets, nor heard any (aside from confused
+complaints about the number of memoizations) from the inheritors of the huge swathes of code I&rsquo;ve
+produced this way, only occasional thanks. You don&rsquo;t need to dive as hard into this as I have, but
+please try the style out when you get a chance!</p>
+
+  </body>
+</html>
