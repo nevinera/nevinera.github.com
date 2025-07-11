@@ -150,7 +150,7 @@ indicator of a missing abstraction, which I&rsquo;ll show you in a moment.</p>
 We have a &ldquo;result&rdquo;, the output. We also have the &ldquo;tokens&rdquo; - that&rsquo;s what you get when you split the
 string up for processing (<code>@str.strip.split(/\s+/)</code>). And that <code>parse_token</code> method - it looks like
 it&rsquo;s cleaning the token up and then making it into an upcased symbol? This is where the
-&ldquo;memoization&rdquo; is for performance people start squinting at me, but remember that <em>that</em> is not my
+&ldquo;memoization is for performance&rdquo; people start squinting at me, but remember that <em>that</em> is not my
 goal most of the time (I work mostly on Rails apps, so while there are <em>occasionally</em> places that
 <em>this</em> sort of performance difference matters, it&rsquo;s so rare that I can discard it as a factor by
 default. In rails, performance means &ldquo;make fewer trips to the database&rdquo;, or occasionally &ldquo;stop

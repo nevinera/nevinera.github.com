@@ -144,7 +144,7 @@ What "things" are there that we could give a definition for? Well, we have a "st
 We have a "result", the output. We also have the "tokens" - that's what you get when you split the
 string up for processing (`@str.strip.split(/\s+/)`). And that `parse_token` method - it looks like
 it's cleaning the token up and then making it into an upcased symbol? This is where the
-"memoization" is for performance people start squinting at me, but remember that _that_ is not my
+"memoization is for performance" people start squinting at me, but remember that _that_ is not my
 goal most of the time (I work mostly on Rails apps, so while there are _occasionally_ places that
 _this_ sort of performance difference matters, it's so rare that I can discard it as a factor by
 default. In rails, performance means "make fewer trips to the database", or occasionally "stop
