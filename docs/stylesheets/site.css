@@ -38,13 +38,11 @@ pre {
   background-color: #E3E0E5;
   margin-left: 0.5em;
   margin-right: 0.5em;
-  padding: 0.3em 1em 0.3em;
   white-space: pre-wrap; }
   @media all and (max-width: 759px) {
     pre {
       margin-left: 0;
       margin-right: 0;
-      padding: 0.3em 0.5em 0.3em;
       font-size: 0.7em; } }
 code {
   background-color: #E3E0E5; }
