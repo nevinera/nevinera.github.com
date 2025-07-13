@@ -23,7 +23,11 @@ def foo
   @foo = calculate_foo
 end
 
-# The more performant idiom (see Aaron Patterson's talks on Object Shape)
+# The more performant idiom (see Aaron Patterson's talk on Object Shape here:
+# https://www.youtube.com/watch?v=R0oxlyVUpDw).
+
+# Declaring each memoized variable in the initializer is even faster (it skips
+# the hash-lookups), but much more awkward in practice.
 class MemoizingThing
   def initialize
     @memoizations = {}
@@ -63,18 +67,20 @@ I'll hold onto it".
 
 But the thing is, knowing that about a method is _powerful_ - it's actually a statement of
 "invariance", and it makes reasoning about behavior simpler. If the value doesn't change, then
-when we define the memoized method we're _declaring the meaning of that method_. Declarative
-programming is far easier to follow than imperative, because that's how we _think_ about things:
-we can understand what each defined "thing" represents, without having to model any mental
-_state_. It's rarely relevant in _my_ code, but it also tells the reader that the method is
-**state-invariant**; if there _is_ any mutable state in the object, _this method doesn't care_.
+when we define the memoized method we're _declaring the meaning of that method_ - not just "how
+do I calculate this value?", but "what does this value represent?". Declarative programming is
+far easier to follow than imperative, because that's how we _think_ about things: we can understand
+what each defined "thing" represents, without having to model any mental _state_. It's rarely
+relevant in my own code, but it also tells the reader that the method is **state-invariant**; if
+there is any mutable state in the object, _this method doesn't care_.
 
-And what I have found is that the _more_ methods I memoize on an object, the better. Ideally (and
-usually) I can memoize _every_ method - this is what I call a "lazy/immutable object."
+And what I have found is that the more methods I memoize on an object, the easier it becomes to
+work with it. Ideally (and usually) I can memoize _every_ implemented method - this is what I call
+a "lazy/immutable object."
 
-### A Lazy/Immutable Object... That's a rock. You've described a rock.
+### A Lazy, Immutable Object... That's a rock. You've described a rock.
 
-Well, mostly I've described anything that doesn't move, so yeah a rock is a good example. Not
+Well, mostly I've described anything that doesn't change, so yeah a rock is a good example. Not
 very relevant to software though.. Here's a bit of code that is _not_ lazy and immutable:
 
 ```ruby
@@ -94,9 +100,9 @@ class StringParser
 end
 ```
 
-It's pretty straightforward really - I'm not trying to create a complex problem to really pick at.
-And it could be a _lot_ worse - there is no actual state being modified.. Okay here's a worse
-version:
+It's pretty straightforward really - I'm not trying to create a complex example here, but in a
+real project there is often _substantially_ more state and code interacting with it. Let's make
+a worse version that does that:
 
 ```ruby
 class StringParser
@@ -123,22 +129,23 @@ end
 
 And if you think that looks _artifically bad_, well.. it is. But I've seen basically that same
 code at least five times in different repositories I needed to work on; this is the _normal_ kind
-of bad. Now for the alternative (well, the one I'm backing here), lazy/immutable style, also called
-"why did you memoize so many methods?". (Named for the PR comment I get six times my first week in
-any new role). The answer is that, to me `memoize` isn't a performance tool, it's an _annotation_ -
+of bad. Now for the alternative approach I and pushing here, lazy/immutable style. It's also called
+"why did you memoize so many methods?", after for the PR comment I get six times my first week in
+any new role. The answer is that, to me `memoize` isn't a performance tool, it's an _annotation_ -
 when I mark a method as memoized, I _might_ be improving its performance, but I'm mostly just
 indicating that it's invariant, which is important to know (not having to think about whether a
-method _should_ be memoized, since it invariably already was.. that's just a bit of a bonus).
+method should be memoized for _performance_ reasons is just a bit of a bonus.
 
-The _goal_ when you're writing something in this style is to _pick good method names_. And yes, I'm
-aware that that's the hardest part of software engineering (aside from style-guide consensus; I'll
-post on that topic another day). In every case possible, pick _nouns_ - complex noun phrases are
-fine, so long as the person reading the name of the method doesn't need to read the method again
-to recall what it does. (Ideally, they won't have to read it in the first place, and will just
-_assume_ that it does what the name says it does, but that's a high bar, and you'll only be able
-to construct such a name maybe two-thirds of the time in reality.) Usually, you can get away with
-having _no_ methods that take any arguments - if you can't make that work, it's frequently an
-indicator of a missing abstraction, which I'll show you in a moment.
+The focus when you're writing something in this style is on **picking good method names**. And yes,
+I'm aware that that's the hardest part of software engineering (aside from style-guide consensus;
+I'll post on that topic another day). In every case possible, pick _nouns_ - complex noun phrases
+(like `original_names_by_downcased_name` or `recovered_users_without_relevant_roles`) are fine, so
+long as the person reading the name of the method doesn't need to read the method again to recall
+what it does. (Ideally, they won't have to read it in the first place, and will just _assume_ that
+it does what the name says it does, but that's a high bar, and you'll only be able to construct such
+a name maybe two-thirds of the time in reality.) Usually, you can get away with having _no_ methods
+that take any arguments - if you can't make that work, it's frequently an indicator of a missing
+abstraction, which I'll show you in a moment.
 
 What "things" are there that we could give a definition for? Well, we have a "string", the input.
 We have a "result", the output. We also have the "tokens" - that's what you get when you split the
@@ -161,16 +168,14 @@ class StringParser
     @str = str
   end
 
-  # Yes, we _could_ just stick the definition of `transformed_tokens` here. But then it doesn't
-  # have a meaningful *name*, and that's the whole point.
+  # while 'transformed_tokens' has a meaning inside this class, it
+  # does _not_ have an outword-facing meaning, so we expose it as
+  # 'result' instead.
   memoize def result = transformed_tokens
 
   private
 
-  memoize def transformed_tokens = cleaned_tokens.map(&:upcase).map(&:to_sym)
-
   memoize def cleaned_tokens = tokens.map { |ct| ct.gsub(/[^a-z]+/i, "_") }
-
   memoize def tokens = str.strip.split(/\s+/)
 end
 ```
@@ -218,12 +223,11 @@ class StringParser
   private
 
   memoize def tokens = str.strip.split(/\s+/)
-
   memoize def transformers = tokens.map { |tok| Transformer.new(tok) }
 
-  # I refer to these as "inner" classes. If it gets complicated, it deserves its own file, but
-  # fundamentally it's a "domain wrapper" for the unparsed token, which exposes the parsed token
-  # as an attribute.
+  # I refer to these as "inner" classes. If it gets complicated, it
+  # deserves its own file, but fundamentally it's a "domain wrapper" for
+  # the unparsed token, which exposes the parsed token as an attribute.
   class Transformer
     include Memery
 
@@ -253,13 +257,14 @@ that it's almost twice as long as the first implementation would be. And the rea
 version _grows_ better. Rather than procedural code defining _how to parse a string_, we have
 declarative code defining _what a parsed string is_. If the logic about how to parse that string
 changes in any of a hundred ways, it will be _obvious_ in the declarations, and usually
-straightforward (when it's not, because the structure of the thing needs to change, that's when
-you should be really glad for the style).
+straightforward. When it's not, because the structure of the thing needs to change, that's when
+you should be really glad for the style - it makes extracting complexity not just easy, but almost
+unavoidable.
 
 Let's change the above by.. adding a new type of token? Well, that's pretty easy, we just add
-`return :emoji if emoji?` and then defined the predicate. What if the process for scanning out
+`return :emoji if emoji?` and then define the new predicate. What if the process for scanning out
 the tokens changes? That's more substantial, but it's really clear where to touch - the definition
-of `tokens` is no longer accurate - it might need another (Tokenizer?) class if the process is
+of `tokens` is no longer accurate - it might need another (`Tokenizer`?) class if the process is
 complex enough, but it'll be surgical, because we can see where the definition of `tokens` is,
 and replace it (or conditionalize it, etc).
 
@@ -273,15 +278,16 @@ memoize def split_tokens = str.strip.split(/\s+/)
 ### That's just like procedural code, with extra steps!
 
 Well yeah, kind of. You _could_ write this as a process that just calculates each of those things
-and sticks it in a variable, doing so in the correct order. That code would be similarly easy to
-read actually, just hard to modify. And honestly, you should do that if it helps: write out the
-procedural approach (with good variable names), then turn variable-setting into lazy methods and
-control structures into classes - that will usually construct a fairly reasonable result.
+and sticks it in a variable, doing so in the correct order - a lot of convenience scripts are
+initially written that way. That code would be similarly easy to read actually, just hard to modify.
+And honestly, you should do that if it helps: write out the procedural approach (with good variable
+names), then turn variable-setting into lazy methods and control structures into classes - that will
+usually construct a fairly reasonable result.
 
-A fresh baguette is just flour, yeast, water, and salt with a few extra steps!
+A rotisserie chicken is just an egg with extra steps.
 
 I want to reassure you though that this is not just a theory. I've been writing the vast bulk of
-my code this way for six years or so, and I've had no regrets, nor heard any (aside from confused
-complaints about the number of memoizations) from the inheritors of the huge swathes of code I've
-produced this way, only occasional thanks. You don't need to dive as hard into this as I have, but
-please try the style out when you get a chance!
+my code in this style for six years or so, and I've had no regrets, nor heard any (aside from
+occasional complaints about the number of memoizations) from the inheritors of the huge tracts of
+code I've produced this way, only occasional thanks. You don't need to dive as hard into this as I
+have, but please try the style out when you get a chance!

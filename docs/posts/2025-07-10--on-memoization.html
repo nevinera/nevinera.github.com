@@ -32,7 +32,11 @@ def foo
   @foo = calculate_foo
 end
 
-# The more performant idiom (see Aaron Patterson&#39;s talks on Object Shape)
+# The more performant idiom (see Aaron Patterson&#39;s talk on Object Shape here:
+# https://www.youtube.com/watch?v=R0oxlyVUpDw).
+
+# Declaring each memoized variable in the initializer is even faster (it skips
+# the hash-lookups), but much more awkward in practice.
 class MemoizingThing
   def initialize
     @memoizations = {}
@@ -71,18 +75,20 @@ I&rsquo;ll hold onto it&rdquo;.</p>
 
 <p>But the thing is, knowing that about a method is <em>powerful</em> - it&rsquo;s actually a statement of
 &ldquo;invariance&rdquo;, and it makes reasoning about behavior simpler. If the value doesn&rsquo;t change, then
-when we define the memoized method we&rsquo;re <em>declaring the meaning of that method</em>. Declarative
-programming is far easier to follow than imperative, because that&rsquo;s how we <em>think</em> about things:
-we can understand what each defined &ldquo;thing&rdquo; represents, without having to model any mental
-<em>state</em>. It&rsquo;s rarely relevant in <em>my</em> code, but it also tells the reader that the method is
-<strong>state-invariant</strong>; if there <em>is</em> any mutable state in the object, <em>this method doesn&rsquo;t care</em>.</p>
+when we define the memoized method we&rsquo;re <em>declaring the meaning of that method</em> - not just &ldquo;how
+do I calculate this value?&rdquo;, but &ldquo;what does this value represent?&rdquo;. Declarative programming is
+far easier to follow than imperative, because that&rsquo;s how we <em>think</em> about things: we can understand
+what each defined &ldquo;thing&rdquo; represents, without having to model any mental <em>state</em>. It&rsquo;s rarely
+relevant in my own code, but it also tells the reader that the method is <strong>state-invariant</strong>; if
+there is any mutable state in the object, <em>this method doesn&rsquo;t care</em>.</p>
 
-<p>And what I have found is that the <em>more</em> methods I memoize on an object, the better. Ideally (and
-usually) I can memoize <em>every</em> method - this is what I call a &ldquo;lazy/immutable object.&rdquo;</p>
+<p>And what I have found is that the more methods I memoize on an object, the easier it becomes to
+work with it. Ideally (and usually) I can memoize <em>every</em> implemented method - this is what I call
+a &ldquo;lazy/immutable object.&rdquo;</p>
 
-<h3>A Lazy/Immutable Object&hellip; That&rsquo;s a rock. You&rsquo;ve described a rock.</h3>
+<h3>A Lazy, Immutable Object&hellip; That&rsquo;s a rock. You&rsquo;ve described a rock.</h3>
 
-<p>Well, mostly I&rsquo;ve described anything that doesn&rsquo;t move, so yeah a rock is a good example. Not
+<p>Well, mostly I&rsquo;ve described anything that doesn&rsquo;t change, so yeah a rock is a good example. Not
 very relevant to software though.. Here&rsquo;s a bit of code that is <em>not</em> lazy and immutable:</p>
 
 <pre><code class="ruby">class StringParser
@@ -101,9 +107,9 @@ very relevant to software though.. Here&rsquo;s a bit of code that is <em>not</e
 end
 </code></pre>
 
-<p>It&rsquo;s pretty straightforward really - I&rsquo;m not trying to create a complex problem to really pick at.
-And it could be a <em>lot</em> worse - there is no actual state being modified.. Okay here&rsquo;s a worse
-version:</p>
+<p>It&rsquo;s pretty straightforward really - I&rsquo;m not trying to create a complex example here, but in a
+real project there is often <em>substantially</em> more state and code interacting with it. Let&rsquo;s make
+a worse version that does that:</p>
 
 <pre><code class="ruby">class StringParser
   def initialize(str)
@@ -129,22 +135,23 @@ end
 
 <p>And if you think that looks <em>artifically bad</em>, well.. it is. But I&rsquo;ve seen basically that same
 code at least five times in different repositories I needed to work on; this is the <em>normal</em> kind
-of bad. Now for the alternative (well, the one I&rsquo;m backing here), lazy/immutable style, also called
-&ldquo;why did you memoize so many methods?&rdquo;. (Named for the PR comment I get six times my first week in
-any new role). The answer is that, to me <code>memoize</code> isn&rsquo;t a performance tool, it&rsquo;s an <em>annotation</em> -
+of bad. Now for the alternative approach I and pushing here, lazy/immutable style. It&rsquo;s also called
+&ldquo;why did you memoize so many methods?&rdquo;, after for the PR comment I get six times my first week in
+any new role. The answer is that, to me <code>memoize</code> isn&rsquo;t a performance tool, it&rsquo;s an <em>annotation</em> -
 when I mark a method as memoized, I <em>might</em> be improving its performance, but I&rsquo;m mostly just
 indicating that it&rsquo;s invariant, which is important to know (not having to think about whether a
-method <em>should</em> be memoized, since it invariably already was.. that&rsquo;s just a bit of a bonus).</p>
+method should be memoized for <em>performance</em> reasons is just a bit of a bonus.</p>
 
-<p>The <em>goal</em> when you&rsquo;re writing something in this style is to <em>pick good method names</em>. And yes, I&rsquo;m
-aware that that&rsquo;s the hardest part of software engineering (aside from style-guide consensus; I&rsquo;ll
-post on that topic another day). In every case possible, pick <em>nouns</em> - complex noun phrases are
-fine, so long as the person reading the name of the method doesn&rsquo;t need to read the method again
-to recall what it does. (Ideally, they won&rsquo;t have to read it in the first place, and will just
-<em>assume</em> that it does what the name says it does, but that&rsquo;s a high bar, and you&rsquo;ll only be able
-to construct such a name maybe two-thirds of the time in reality.) Usually, you can get away with
-having <em>no</em> methods that take any arguments - if you can&rsquo;t make that work, it&rsquo;s frequently an
-indicator of a missing abstraction, which I&rsquo;ll show you in a moment.</p>
+<p>The focus when you&rsquo;re writing something in this style is on <strong>picking good method names</strong>. And yes,
+I&rsquo;m aware that that&rsquo;s the hardest part of software engineering (aside from style-guide consensus;
+I&rsquo;ll post on that topic another day). In every case possible, pick <em>nouns</em> - complex noun phrases
+(like <code>original_names_by_downcased_name</code> or <code>recovered_users_without_relevant_roles</code>) are fine, so
+long as the person reading the name of the method doesn&rsquo;t need to read the method again to recall
+what it does. (Ideally, they won&rsquo;t have to read it in the first place, and will just <em>assume</em> that
+it does what the name says it does, but that&rsquo;s a high bar, and you&rsquo;ll only be able to construct such
+a name maybe two-thirds of the time in reality.) Usually, you can get away with having <em>no</em> methods
+that take any arguments - if you can&rsquo;t make that work, it&rsquo;s frequently an indicator of a missing
+abstraction, which I&rsquo;ll show you in a moment.</p>
 
 <p>What &ldquo;things&rdquo; are there that we could give a definition for? Well, we have a &ldquo;string&rdquo;, the input.
 We have a &ldquo;result&rdquo;, the output. We also have the &ldquo;tokens&rdquo; - that&rsquo;s what you get when you split the
@@ -166,16 +173,14 @@ intermediate result, <code>cleaned_tokens</code>.</p>
     @str = str
   end
 
-  # Yes, we _could_ just stick the definition of `transformed_tokens` here. But then it doesn&#39;t
-  # have a meaningful *name*, and that&#39;s the whole point.
+  # while &#39;transformed_tokens&#39; has a meaning inside this class, it
+  # does _not_ have an outword-facing meaning, so we expose it as
+  # &#39;result&#39; instead.
   memoize def result = transformed_tokens
 
   private
 
-  memoize def transformed_tokens = cleaned_tokens.map(&amp;:upcase).map(&amp;:to_sym)
-
   memoize def cleaned_tokens = tokens.map { |ct| ct.gsub(/[^a-z]+/i, &quot;_&quot;) }
-
   memoize def tokens = str.strip.split(/\s+/)
 end
 </code></pre>
@@ -219,12 +224,11 @@ write it as two.</p>
   private
 
   memoize def tokens = str.strip.split(/\s+/)
-
   memoize def transformers = tokens.map { |tok| Transformer.new(tok) }
 
-  # I refer to these as &quot;inner&quot; classes. If it gets complicated, it deserves its own file, but
-  # fundamentally it&#39;s a &quot;domain wrapper&quot; for the unparsed token, which exposes the parsed token
-  # as an attribute.
+  # I refer to these as &quot;inner&quot; classes. If it gets complicated, it
+  # deserves its own file, but fundamentally it&#39;s a &quot;domain wrapper&quot; for
+  # the unparsed token, which exposes the parsed token as an attribute.
   class Transformer
     include Memery
 
@@ -254,13 +258,14 @@ that it&rsquo;s almost twice as long as the first implementation would be. And t
 version <em>grows</em> better. Rather than procedural code defining <em>how to parse a string</em>, we have
 declarative code defining <em>what a parsed string is</em>. If the logic about how to parse that string
 changes in any of a hundred ways, it will be <em>obvious</em> in the declarations, and usually
-straightforward (when it&rsquo;s not, because the structure of the thing needs to change, that&rsquo;s when
-you should be really glad for the style).</p>
+straightforward. When it&rsquo;s not, because the structure of the thing needs to change, that&rsquo;s when
+you should be really glad for the style - it makes extracting complexity not just easy, but almost
+unavoidable.</p>
 
 <p>Let&rsquo;s change the above by.. adding a new type of token? Well, that&rsquo;s pretty easy, we just add
-<code>return :emoji if emoji?</code> and then defined the predicate. What if the process for scanning out
+<code>return :emoji if emoji?</code> and then define the new predicate. What if the process for scanning out
 the tokens changes? That&rsquo;s more substantial, but it&rsquo;s really clear where to touch - the definition
-of <code>tokens</code> is no longer accurate - it might need another (Tokenizer?) class if the process is
+of <code>tokens</code> is no longer accurate - it might need another (<code>Tokenizer</code>?) class if the process is
 complex enough, but it&rsquo;ll be surgical, because we can see where the definition of <code>tokens</code> is,
 and replace it (or conditionalize it, etc).</p>
 
@@ -273,18 +278,19 @@ memoize def split_tokens = str.strip.split(/\s+/)
 <h3>That&rsquo;s just like procedural code, with extra steps!</h3>
 
 <p>Well yeah, kind of. You <em>could</em> write this as a process that just calculates each of those things
-and sticks it in a variable, doing so in the correct order. That code would be similarly easy to
-read actually, just hard to modify. And honestly, you should do that if it helps: write out the
-procedural approach (with good variable names), then turn variable-setting into lazy methods and
-control structures into classes - that will usually construct a fairly reasonable result.</p>
+and sticks it in a variable, doing so in the correct order - a lot of convenience scripts are
+initially written that way. That code would be similarly easy to read actually, just hard to modify.
+And honestly, you should do that if it helps: write out the procedural approach (with good variable
+names), then turn variable-setting into lazy methods and control structures into classes - that will
+usually construct a fairly reasonable result.</p>
 
-<p>A fresh baguette is just flour, yeast, water, and salt with a few extra steps!</p>
+<p>A rotisserie chicken is just an egg with extra steps.</p>
 
 <p>I want to reassure you though that this is not just a theory. I&rsquo;ve been writing the vast bulk of
-my code this way for six years or so, and I&rsquo;ve had no regrets, nor heard any (aside from confused
-complaints about the number of memoizations) from the inheritors of the huge swathes of code I&rsquo;ve
-produced this way, only occasional thanks. You don&rsquo;t need to dive as hard into this as I have, but
-please try the style out when you get a chance!</p>
+my code in this style for six years or so, and I&rsquo;ve had no regrets, nor heard any (aside from
+occasional complaints about the number of memoizations) from the inheritors of the huge tracts of
+code I&rsquo;ve produced this way, only occasional thanks. You don&rsquo;t need to dive as hard into this as I
+have, but please try the style out when you get a chance!</p>
 
   </body>
 </html>
